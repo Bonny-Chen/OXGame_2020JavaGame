@@ -12,6 +12,7 @@ public class ButtonSample {
         ImageIcon   imageIcon = new ImageIcon();    // Used for resize background 
         Image       image;
         Image       tmpimg;
+        Image       TEST;
         screen.setTitle("ButtonSample");
         screen.setVisible(true);
         screen.setSize(1024,780);
