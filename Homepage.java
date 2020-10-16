@@ -16,6 +16,8 @@ public class Homepage {
         ImageIcon       HowtoImg;
         JLabel      ImgLabel = new JLabel();
         JLabel      jl = new JLabel();
+        JLabel      TEST = new JLabel();            // TEST FOR PUSH
+
 
         // Default Setting
         screen.setTitle("OXGame");
