@@ -1,6 +1,5 @@
 import javax.swing.JFrame;
 import javax.swing.ImageIcon;
-import javax.swing.text.html.ImageView;
 
 import java.awt.*;
 import javax.swing.*;
