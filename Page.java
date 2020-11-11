@@ -4,6 +4,7 @@ import java.awt.event.*;
 
 public class Page extends JFrame{
     public static JPanel PlayerPanel = new JPanel();            // PlayerSelectionPage's Panel
+    public static JPanel SpacePanel = new JPanel();            // SpaceFlagPage's Panel
     public static JFrame screen = new JFrame();
 
 
@@ -12,7 +13,7 @@ public class Page extends JFrame{
         screen.setVisible(true);
         screen.setSize(900, 630);
         screen.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        PlayerSelectionPage();
+        SpaceFlagPage();
         screen.validate();
 
     }
@@ -24,8 +25,8 @@ public class Page extends JFrame{
 
 
     public static void PlayerSelectionPage(){
-        screen.setTitle("PlayerSelectionPage");
         PlayerPanel.setVisible(true);
+        screen.setTitle("PlayerSelectionPage");
         PlayerPanel.setBackground(Color.decode("#000339"));
         PlayerPanel.setLayout(null);
 
@@ -50,6 +51,31 @@ public class Page extends JFrame{
         screen.add(PlayerPanel);
 
     }
+    
+    public static void SpaceFlagPage(){
+        ImageIcon flagIcon,flagIcon2;
+        Image image;
+        JLabel flagLabel ,flagLabel2;
+        SpacePanel.setVisible(true);
+        screen.setTitle("SpaceFlagPage");
+        //PlayerPanel.setBackground(Color.decode("#000339"));
+        SpacePanel.setLayout(null);
+
+        flagIcon = new ImageIcon("Img/Flag.png");
+        image = flagIcon.getImage();
+        image = image.getScaledInstance(50, 70, java.awt.Image.SCALE_SMOOTH);
+        flagIcon = new ImageIcon(image);
+        flagIcon2 = flagIcon;
+        flagLabel = new JLabel (flagIcon);
+        flagLabel2 = new JLabel (flagIcon2);
+
+        flagLabel.setBounds(200, 0, 50, 70);
+        flagLabel2.setBounds(600, 0, 50, 70);
+
+        SpacePanel.add(flagLabel);
+        SpacePanel.add(flagLabel2);
+        screen.add(SpacePanel);
+    }
 
     private static class ButtonHandler implements ActionListener {
         private Integer LastClick = -1;
@@ -69,7 +95,10 @@ public class Page extends JFrame{
             // Switch to HomePage
             if (myBtn.getID() == 5) {                               
                 PlayerPanel.setVisible(false);
-                screen.validate();
+            }else if (myBtn.getID() == 4){
+                PlayerPanel.setVisible(false);
+                // switch to GamePage()
+                //GamePage();
             }
             myBtn.setIcon(myBtn.iconHover);
             if (myBtn.IsClicked() == 1) {
@@ -109,7 +138,7 @@ public class Page extends JFrame{
         }
     }
 
-
+    
 }
 
 class ButtonImageCreate extends JButton {
