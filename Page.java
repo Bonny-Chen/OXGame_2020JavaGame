@@ -1,61 +1,57 @@
-package Pages;
-import javax.swing.JFrame;
-import javax.swing.ImageIcon;
-
 import java.awt.*;
 import javax.swing.*;
 import java.awt.event.*;
 
-public class PlayerSelectionPage extends JFrame {
-    private JPanel jp, HomePanel;
-    private PlayerSelectionPage screen;
+public class Page extends JFrame{
+    public static JPanel PlayerPanel = new JPanel();            // PlayerSelectionPage's Panel
+    public static JFrame screen = new JFrame();
 
-    public static void main() {
-        PlayerSelectionPage GUI = new PlayerSelectionPage();
-        GUI.Init();
-    }
 
-    public void Init() {
-        screen = new PlayerSelectionPage();
+    public static void main(String args[]) {
         screen.setTitle("HomePage");
         screen.setVisible(true);
         screen.setSize(900, 630);
         screen.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        // First Page
         PlayerSelectionPage();
         screen.validate();
+
     }
+    
 
-    ButtonImageCreate[] Button;
-    ButtonHandler BH = new ButtonHandler();
-    MouseHandler MH = new MouseHandler();
+    static ButtonImageCreate[] Button;
+    static ButtonHandler BH = new ButtonHandler();
+    static MouseHandler MH = new MouseHandler();
 
-    public void PlayerSelectionPage() {
-        jp = new JPanel();
-        jp.setBackground(Color.decode("#000339"));
-        jp.setLayout(null);
+
+    public static void PlayerSelectionPage(){
+        screen.setTitle("PlayerSelectionPage");
+        PlayerPanel.setVisible(true);
+        PlayerPanel.setBackground(Color.decode("#000339"));
+        PlayerPanel.setLayout(null);
+
         Button = new ButtonImageCreate[6];
         for (int x = 0; x < Button.length; x++) {
             Button[x] = new ButtonImageCreate(x, "Img/Player1-" + Integer.toString(x + 1) + "UnSelected.png",
                     "Img/Player1-" + Integer.toString(x + 1) + ".png", (x + 1) * (x + 200) + (x - 50), 100, 170, 230);
             Button[x].addActionListener(BH);
             Button[x].addMouseListener(MH);
-            jp.add(Button[x]);
+            PlayerPanel.add(Button[x]);
         }
+
         Button[4] = new ButtonImageCreate(4, "Img/OKBTN-UnSelected.png", "Img/OKBTN.png", 355, 450, 150, 70);
         Button[4].addActionListener(BH);
         Button[4].addMouseListener(MH);
-        jp.add(Button[4]);
+        PlayerPanel.add(Button[4]);
 
         Button[5] = new ButtonImageCreate(5, "Img/Back.png", "Img/Back.png", 30, 30, 50, 50);
         Button[5].addActionListener(BH);
         Button[5].addMouseListener(MH);
-        jp.add(Button[5]);
-        screen.add(jp);
+        PlayerPanel.add(Button[5]);
+        screen.add(PlayerPanel);
 
     }
 
-    private class ButtonHandler implements ActionListener {
+    private static class ButtonHandler implements ActionListener {
         private Integer LastClick = -1;
 
         @Override
@@ -72,9 +68,7 @@ public class PlayerSelectionPage extends JFrame {
             
             // Switch to HomePage
             if (myBtn.getID() == 5) {                               
-                screen.remove(jp);                                  // Clear the screen
-                Pages.Homepage homepage = new Pages.Homepage();
-                homepage.Page();
+                PlayerPanel.setVisible(false);
                 screen.validate();
             }
             myBtn.setIcon(myBtn.iconHover);
@@ -101,7 +95,7 @@ public class PlayerSelectionPage extends JFrame {
         }
     }
 
-    private class MouseHandler extends MouseAdapter {
+    private static class MouseHandler extends MouseAdapter {
         // @Override
         public void mouseEntered(MouseEvent e) {
             ButtonImageCreate myBtn = (ButtonImageCreate) e.getSource();
@@ -114,6 +108,7 @@ public class PlayerSelectionPage extends JFrame {
                 myBtn.setIcon(myBtn.icon);
         }
     }
+
 
 }
 
