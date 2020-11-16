@@ -1,22 +1,14 @@
-package Pages;
-
 import java.awt.*;
 import javax.swing.*;
-public class EmptyGUI {
+public class EmptyGUI extends JFrame {
     
-    public static void Page(){
-        JFrame      screen = new JFrame();
+    EmptyGUI(){
+        this.setTitle("OXGame");
+        this.setVisible(true);
+        this.setSize(900,630);
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        screen.setTitle("OXGame");
-        screen.setVisible(true);
-        screen.setSize(1024,780);
-        screen.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        screen.validate();
+        // this.validate();
 
     }
-
-    // public static void main(String args[]){
-    //     Page();
-    // }
 }

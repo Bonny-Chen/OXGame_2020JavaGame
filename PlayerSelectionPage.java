@@ -1,65 +1,84 @@
-package Pages;
 import javax.swing.JFrame;
 import javax.swing.ImageIcon;
+import java.rmi.*;
 
 import java.awt.*;
 import javax.swing.*;
 import java.awt.event.*;
 
-public class PlayerSelectionPage extends JFrame {
-    private JPanel jp, HomePanel;
-    private PlayerSelectionPage screen;
-
-    public static void main() {
-        PlayerSelectionPage GUI = new PlayerSelectionPage();
-        GUI.Init();
-    }
-
-    public void Init() {
-        screen = new PlayerSelectionPage();
-        screen.setTitle("HomePage");
-        screen.setVisible(true);
-        screen.setSize(900, 630);
-        screen.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        // First Page
-        PlayerSelectionPage();
-        screen.validate();
-    }
-
+public class PlayerSelectionPage {
+    public static Interface		o = null;
+    // Main connect = new Connection
+    EmptyGUI window = new EmptyGUI();
+    private JPanel PlayerPanel;
+    public static Integer player;
+    public static Integer Character = 9;
+    public static int inform[] = new int[2];
     ButtonImageCreate[] Button;
     ButtonHandler BH = new ButtonHandler();
     MouseHandler MH = new MouseHandler();
+    // public static Interface o = Main.Connection();
+    public static void Connection(){
+        try
+	    {
+	    	o = (Interface) Naming.lookup("rmi://127.0.0.1/OXGame");
+            System.out.println("RMI server connected");
+            player = o.GetPlayerNum();
+            
+	    }
+	    catch(Exception e)
+	    {
+	    	System.out.println("Server lookup exception: " + e.getMessage());
+        }
+    }
+    PlayerSelectionPage() {
+        
+        window.setTitle("PlayerSelectionPage");
 
-    public void PlayerSelectionPage() {
-        jp = new JPanel();
-        jp.setBackground(Color.decode("#000339"));
-        jp.setLayout(null);
+        Connection();
+        PlayerPanel = new JPanel();
+        PlayerPanel.setBackground(Color.decode("#000339"));
+        PlayerPanel.setLayout(null);
         Button = new ButtonImageCreate[6];
         for (int x = 0; x < Button.length; x++) {
             Button[x] = new ButtonImageCreate(x, "Img/Player1-" + Integer.toString(x + 1) + "UnSelected.png",
                     "Img/Player1-" + Integer.toString(x + 1) + ".png", (x + 1) * (x + 200) + (x - 50), 100, 170, 230);
             Button[x].addActionListener(BH);
             Button[x].addMouseListener(MH);
-            jp.add(Button[x]);
+            PlayerPanel.add(Button[x]);
         }
         Button[4] = new ButtonImageCreate(4, "Img/OKBTN-UnSelected.png", "Img/OKBTN.png", 355, 450, 150, 70);
         Button[4].addActionListener(BH);
         Button[4].addMouseListener(MH);
-        jp.add(Button[4]);
+        PlayerPanel.add(Button[4]);
 
         Button[5] = new ButtonImageCreate(5, "Img/Back.png", "Img/Back.png", 30, 30, 50, 50);
         Button[5].addActionListener(BH);
         Button[5].addMouseListener(MH);
-        jp.add(Button[5]);
-        screen.add(jp);
-
+        PlayerPanel.add(Button[5]);
+        window.add(PlayerPanel);
+        window.validate();
     }
 
+    public static int GetPlayer(){
+        return player;
+    }
+
+    public static int GetRole(){
+        return Character;
+    }
+
+    public static void SetPlayerInfor(){
+       inform[player] = Character;
+       System.out.println(inform[player]);
+    }
+    public static int GetPlayerInfor(){
+        return inform[player];
+    }
     private class ButtonHandler implements ActionListener {
         private Integer LastClick = -1;
-
         @Override
-        public void actionPerformed(ActionEvent e) {
+        public synchronized void actionPerformed(ActionEvent e) {
             ButtonImageCreate myBtn = (ButtonImageCreate) e.getSource();
             ButtonImageCreate tmpBtn = myBtn;
             if (ExistsLastClick() >= 0 && ExistsLastClick() != 4) {
@@ -72,10 +91,19 @@ public class PlayerSelectionPage extends JFrame {
             
             // Switch to HomePage
             if (myBtn.getID() == 5) {                               
-                screen.remove(jp);                                  // Clear the screen
-                Pages.Homepage homepage = new Pages.Homepage();
-                homepage.Page();
-                screen.validate();
+                window.setVisible(false);
+            }else if (myBtn.getID() == 4){          // OKButton Clicked
+                try{
+                    Character = o.PlayerSelection(GetPlayer() , ExistsLastClick());
+                    System.out.println("You chose Role " + Character);
+                }catch(Exception ke)
+                {
+                    System.out.println(ke);
+                }
+                SetPlayerInfor();
+
+                window.setVisible(false);
+                new SpaceFlagPage();
             }
             myBtn.setIcon(myBtn.iconHover);
             if (myBtn.IsClicked() == 1) {
@@ -92,11 +120,11 @@ public class PlayerSelectionPage extends JFrame {
 
         // Use for detect whethere exists last clicked button
         // If yes , cancel the button click
-        public void getLastClick(int LastClick) {
+        public synchronized void getLastClick(int LastClick) {
             this.LastClick = LastClick;
         }
 
-        public int ExistsLastClick() {
+        public synchronized int ExistsLastClick() {
             return this.LastClick;
         }
     }
