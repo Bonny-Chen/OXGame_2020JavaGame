@@ -1,5 +1,3 @@
-package Pages;
-
 import java.awt.*;
 import javax.swing.*;
 public class EmptyGUI {
