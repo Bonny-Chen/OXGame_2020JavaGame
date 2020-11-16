@@ -16,19 +16,17 @@ public class Homepage {
         JLabel      titLabel = new JLabel("OX Game");
         ImageIcon   logoIcon = new ImageIcon("Img\\logo.png");
         JLabel      ImgLabel = new JLabel();
-        
-
 
         // Default Setting
-        screen.setTitle("OXGame");
+        screen.setTitle("Home Page");
         screen.setVisible(true);
         screen.setSize(900, 630);
         screen.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         jp.setLayout(null);     //for position
 
         // Show image
-        logoIcon.setImage(logoIcon.getImage().getScaledInstance(200,120,Image.SCALE_DEFAULT));
-        ImgLabel.setBounds(300,190,300,300);            //Image setting(x,y,width,heigh)
+        logoIcon.setImage(logoIcon.getImage().getScaledInstance(350,330,Image.SCALE_DEFAULT));
+        ImgLabel.setBounds(280,100,500,500);            //Image setting(x,y,width,heigh)
         ImgLabel.setIcon(logoIcon);
         jp.add(ImgLabel);
 

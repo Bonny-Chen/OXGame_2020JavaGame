@@ -1,14 +1,20 @@
 import java.awt.*;
 import javax.swing.*;
-public class EmptyGUI extends JFrame {
+public class EmptyGUI {
     
-    EmptyGUI(){
-        this.setTitle("OXGame");
-        this.setVisible(true);
-        this.setSize(900,630);
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    public static void Page(){
+        JFrame      screen = new JFrame();
 
-        // this.validate();
+        screen.setTitle("OXGame");
+        screen.setVisible(true);
+        screen.setSize(1024,780);
+        screen.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        screen.validate();
 
     }
+
+    // public static void main(String args[]){
+    //     Page();
+    // }
 }
