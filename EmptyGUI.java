@@ -1,6 +1,7 @@
+package Pages;
+
 import java.awt.*;
 import javax.swing.*;
-
 public class EmptyGUI {
     
     public static void Page(){
@@ -15,7 +16,7 @@ public class EmptyGUI {
 
     }
 
-    public static void main(String args[]){
-        Page();
-    }
+    // public static void main(String args[]){
+    //     Page();
+    // }
 }

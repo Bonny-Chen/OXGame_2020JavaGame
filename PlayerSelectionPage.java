@@ -1,6 +1,6 @@
+package Pages;
 import javax.swing.JFrame;
 import javax.swing.ImageIcon;
-import javax.swing.text.html.ImageView;
 
 import java.awt.*;
 import javax.swing.*;
@@ -9,7 +9,12 @@ import java.awt.event.*;
 public class PlayerSelectionPage extends JFrame {
     private JPanel jp;
     private PlayerSelectionPage screen;
+<<<<<<< HEAD
     public static void main(String[] args) {
+=======
+
+    public static void main() {
+>>>>>>> main
         PlayerSelectionPage GUI = new PlayerSelectionPage();
         GUI.Init();
     }
@@ -54,6 +59,7 @@ public class PlayerSelectionPage extends JFrame {
 
     }
 
+<<<<<<< HEAD
     public void HomePage() {
         
         jp = new JPanel();
@@ -178,6 +184,8 @@ public class PlayerSelectionPage extends JFrame {
         screen.validate();
     }
 
+=======
+>>>>>>> main
     private class ButtonHandler implements ActionListener {
         private Integer LastClick = -1;
 
@@ -197,7 +205,8 @@ public class PlayerSelectionPage extends JFrame {
             // Switch to HomePage
             if (myBtn.getID() == 5) {                               
                 screen.remove(jp);                                  // Clear the screen
-                HomePage();
+                Pages.Homepage homepage = new Pages.Homepage();
+                homepage.Page();
                 screen.validate();
             }
 

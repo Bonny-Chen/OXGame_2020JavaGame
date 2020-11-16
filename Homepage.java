@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+package Pages;
+>>>>>>> main
 import java.awt.*;
 import javax.swing.*;
 import java.awt.event.*;
@@ -69,6 +73,14 @@ public class Homepage {
         HowToBtn.setForeground(Color.decode("#FF12345"));
         ExitBtn.setForeground(Color.decode("#FF12345"));
 
+        StartBtn.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Pages.PlayerSelectionPage PlayerPage = new Pages.PlayerSelectionPage();
+                PlayerPage.PlayerSelectionPage();
+            }
+        });
         
          
 
