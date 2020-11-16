@@ -1,10 +1,3 @@
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-package Pages;
->>>>>>> main
->>>>>>> da8e34b57e5806e7f6dea635ffc9ffa65dfbb3d0
 import java.awt.*;
 import javax.swing.*;
 import java.awt.event.*;
