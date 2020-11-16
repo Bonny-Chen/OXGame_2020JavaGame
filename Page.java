@@ -19,7 +19,7 @@ public class Page extends JFrame implements KeyListener {
 
     public static int inform[] = new int[2];
     public static int x = 500;
-
+    public static int s = 500;      // use for recording server moving
     private static ImageIcon player1;
     private static JLabel    player1Lab = new JLabel();
     int round =0;
@@ -47,20 +47,21 @@ public class Page extends JFrame implements KeyListener {
 
     public static void main(String args[]) {
 
-        Socket client = null;
-        int port = 6666;
+        // Socket client = null;
+        // int port = 6666;
 
-        try {
-            // Creates a stream socket and connects it to the specified port number
-            // at the specified IP address.
-            client = new Socket(args[0], port);
-            System.out.println("Client In");
-            new Page();
+        // try {
+        //     // Creates a stream socket and connects it to the specified port number
+        //     // at the specified IP address.
+        //     client = new Socket(args[0], port);
+        //     System.out.println("Client In");
 
-            client.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        //     client.close();
+        // } catch (IOException e) {
+        //     e.printStackTrace();
+        // }
+        new Page();
+
     }
 
     static ButtonImageCreate[] Button;
@@ -219,8 +220,10 @@ public class Page extends JFrame implements KeyListener {
         ImageIcon flagIcon, flagIcon2, character, character2, srver; // server : Client VS Server(PC)
         Image image;
         JLabel flagLabel, flagLabel2, characterLabel2, srverLabel;
-        int Player, role, y = 500, s = 500;
+        int Player, role, y = 500;
         int anPlayer, anRole = 9;
+
+
         SpacePanel.setVisible(true);
         screen.setTitle("SpaceFlagPage");
         SpacePanel.setLayout(null);
@@ -279,24 +282,38 @@ public class Page extends JFrame implements KeyListener {
         // }catch(Exception error){
         // System.out.println(error);
         // }
-
-        try {
-            s = o.srverMove(s);
-        } catch (Exception error) {
-            System.out.println("s :" + error);
-        }
-
-        if (Player == 1) {
-            characterLabel.setBounds(600, x, 50, 70);
-            srverLabel.setBounds(200, s, 50, 70);
-            // characterLabel2.setBounds(200, y, 50, 70);
-
-        } else {
-            characterLabel.setBounds(200, x, 50, 70);
-            srverLabel.setBounds(600, s, 50, 70);
-            // characterLabel2.setBounds(600, y, 50, 70);
-        }
-
+        Thread playerThread = new Thread(new Runnable(){
+            public void run(){
+                if (Player == 1) {
+                    characterLabel.setBounds(600, x, 50, 70);
+                } else {
+                    characterLabel.setBounds(200, x, 50, 70);
+                }
+            }
+        });
+       
+        Thread svrThread = new Thread(new Runnable(){
+            public void run(){
+                while(s!=0){
+                    if (Player == 1) {
+                        srverLabel.setBounds(200, s, 50, 70);
+                    } else {
+                        srverLabel.setBounds(600, s, 50, 70);
+                    }
+        
+                
+                    try {
+                        s = o.srverMove(10);
+                        Thread.sleep(500);
+                    } catch (Exception error) {
+                        System.out.println("s :" + error);
+                    }
+                }
+            }
+        });
+        
+        playerThread.start();
+        svrThread.start();
         SpacePanel.add(flagLabel);
         SpacePanel.add(flagLabel2);
         SpacePanel.add(characterLabel);
@@ -388,7 +405,7 @@ public class Page extends JFrame implements KeyListener {
                     System.out.println("In");
 
                 } catch (Exception er) {
-                    System.out.println(er);
+                    System.out.println(er + " " + player);
                 }
                 // SetPlayerInfor();
                 // System.out.println("SetPlayerInfor : "+ "[" + player +"]" + " = "

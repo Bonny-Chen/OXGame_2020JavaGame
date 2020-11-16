@@ -8,7 +8,7 @@ public class RMIImplement extends UnicastRemoteObject implements Interface
     public static int PlayerNum = 1;
     public static int playerInform[] = new int[2];            // [role]
     public static int Moving[] = new int[2];
-    public static int s = 10;
+    public static int s = 500;
     public RMIImplement() throws java.rmi.RemoteException
 	{
 		super(); 	// Use constructor of parent class
@@ -54,7 +54,7 @@ public class RMIImplement extends UnicastRemoteObject implements Interface
     }
 
     public synchronized void SetInform(int player , int role)throws java.rmi.RemoteException{
-        playerInform[player-1] = role;
+        playerInform[player] = role;
     }
 
     public synchronized int GetInform(int player)throws java.rmi.RemoteException{
@@ -74,8 +74,9 @@ public class RMIImplement extends UnicastRemoteObject implements Interface
     }
 
     public synchronized int srverMove(int s)throws java.rmi.RemoteException{
-        System.out.println("ServerMove");
-        this.s = s - this.s;
+        this.s = this.s - s;
+        System.out.println("ServerMove to "+this.s);
+
         return this.s;
     }
 
