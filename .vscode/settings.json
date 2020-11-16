@@ -1,0 +1,7 @@
+{
+    "java.home": "",
+    "java.debug.settings.exceptionBreakpoint.skipClasses": [
+    
+    ],
+    "maven.terminal.useJavaHome": true
+}
