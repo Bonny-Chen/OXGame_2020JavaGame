@@ -5,63 +5,60 @@ import java.rmi.*;
 
 import java.net.*;
 import java.io.*;
+import java.nio.channels.SocketChannel;
+import java.nio.ByteBuffer;
 
-public class Page extends JFrame implements KeyListener {
+public class Page extends Thread {
     public static Interface o = null;
-
+    public static Thread thread;
+    SocketSrver socketSrver;
     public static JPanel PlayerPanel = new JPanel(); // PlayerSelectionPage's Panel
     public static JPanel SpacePanel = new JPanel(); // SpaceFlagPage's Panel
     private static JPanel jp;
     public static JFrame screen = new JFrame();
     public static JLabel characterLabel;
     public static Integer player;
+    public static Integer onlinePlayer=0;
     public static Integer Character = 9;
-
+    public static Integer anRole = 9;
+    public static Integer anPlayer;
     public static int inform[] = new int[2];
     public static int x = 500;
-    public static int s = 500;      // use for recording server moving
+    public static int s = 500; // use for recording server moving
     private static ImageIcon player1;
-    private static JLabel    player1Lab = new JLabel();
-    int round =0;
+    private static JLabel player1Lab = new JLabel();
+    int round = 0;
 
     Page() {
+        // RMI Function
+        // try {
+        //     o = (Interface) Naming.lookup("rmi://127.0.0.1/OXGame");
+        //     System.out.println("RMI server connected");
+        //     player = o.GetPlayerNum();
+        //     System.out.println("Player " + player + " login");
 
-        try {
-            o = (Interface) Naming.lookup("rmi://127.0.0.1/OXGame");
-            System.out.println("RMI server connected");
-            player = o.GetPlayerNum();
-            System.out.println("Player "+player +" login");
-
-        } catch (Exception e) {
-            System.out.println("Server lookup exception: " + e.getMessage());
-        }
+        // } catch (Exception e) {
+        //     System.out.println("Server lookup exception: " + e.getMessage());
+        // }
         screen.setTitle("HomePage");
         screen.setVisible(true);
         screen.setSize(900, 630);
         screen.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        screen.addKeyListener(this);
         HomePage();
         screen.validate();
 
     }
 
     public static void main(String args[]) {
+        Page page = new Page();
+        thread = new Thread();
+        thread.start();
+    }
 
-        // Socket client = null;
-        // int port = 6666;
-
-        // try {
-        //     // Creates a stream socket and connects it to the specified port number
-        //     // at the specified IP address.
-        //     client = new Socket(args[0], port);
-        //     System.out.println("Client In");
-
-        //     client.close();
-        // } catch (IOException e) {
-        //     e.printStackTrace();
+    public void run(){
+        // while(!socketSrver.accpected){
+        //     screen.disp
         // }
-        new Page();
-
     }
 
     static ButtonImageCreate[] Button;
@@ -69,32 +66,31 @@ public class Page extends JFrame implements KeyListener {
     static MouseHandler MH = new MouseHandler();
 
     public static void HomePage() {
-        
         jp = new JPanel();
-        JButton     StartBtn = new JButton("START");
-        JButton     HowToBtn = new JButton("HOW TO");
-        JButton     ExitBtn = new JButton("EXIT");
-        JLabel      titLabel = new JLabel("OX Game");
-        ImageIcon   logoIcon = new ImageIcon("Img\\logo.png");
-        JLabel      ImgLabel = new JLabel();
+        JButton StartBtn = new JButton("START");
+        JButton HowToBtn = new JButton("HOW TO");
+        JButton ExitBtn = new JButton("EXIT");
+        JLabel titLabel = new JLabel("OX Game");
+        ImageIcon logoIcon = new ImageIcon("Img\\logo.png");
+        JLabel ImgLabel = new JLabel();
 
         // Default Setting
         screen.setTitle("Home Page");
         screen.setVisible(true);
         screen.setSize(900, 630);
         screen.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        jp.setLayout(null);     //for position
+        jp.setLayout(null); // for position
 
         // Show image
-        logoIcon.setImage(logoIcon.getImage().getScaledInstance(350,330,Image.SCALE_DEFAULT));
-        ImgLabel.setBounds(280,100,500,500);            //Image setting(x,y,width,heigh)
+        logoIcon.setImage(logoIcon.getImage().getScaledInstance(350, 330, Image.SCALE_DEFAULT));
+        ImgLabel.setBounds(280, 100, 500, 500); // Image setting(x,y,width,heigh)
         ImgLabel.setIcon(logoIcon);
         jp.add(ImgLabel);
 
         // titLabel Setting (Title)
-        titLabel.setBounds(350, 100, 300, 50);                   // Title setting (x,y,width,heigh)
-        titLabel.setFont(new java.awt.Font("Dialog", 4, 50));   // Resize Font
-        titLabel.setForeground(Color.decode("#FFFFFF")); 
+        titLabel.setBounds(350, 100, 300, 50); // Title setting (x,y,width,heigh)
+        titLabel.setFont(new java.awt.Font("Dialog", 4, 50)); // Resize Font
+        titLabel.setForeground(Color.decode("#FFFFFF"));
         jp.add(titLabel);
 
         // Background setting
@@ -105,39 +101,39 @@ public class Page extends JFrame implements KeyListener {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                //System.out.println("Btn Click");
-                HowToBtn.setContentAreaFilled(false);   // Remove Btn Background
-                HowToBtn.setFocusable(false);           //inside line invisible
-                HowToBtn.setBorderPainted(false);       //outside line invisible
+                // System.out.println("Btn Click");
+                HowToBtn.setContentAreaFilled(false); // Remove Btn Background
+                HowToBtn.setFocusable(false); // inside line invisible
+                HowToBtn.setBorderPainted(false); // outside line invisible
             }
         });
         StartBtn.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                //System.out.println("Btn Click");
-                screen.remove(jp);                                  // Clear the screen
+                // System.out.println("Btn Click");
+                screen.remove(jp); // Clear the screen
                 screen.setTitle("Player Select");
                 PlayerSelectionPage();
                 screen.validate();
             }
         });
-        
-        // button setting
-        StartBtn.setFocusable(false);                           //inside line invisible               
-        StartBtn.setBorderPainted(false);                       //outside line invisible
-        HowToBtn.setFocusable(false);                                         
-        HowToBtn.setBorderPainted(false);                      
-        ExitBtn.setFocusable(false);                                       
-        ExitBtn.setBorderPainted(false);                       
 
-        StartBtn.setBounds(630, 300, 160, 30);                  //set position
-        HowToBtn.setBounds(630,350,160,30);
+        // button setting
+        StartBtn.setFocusable(false); // inside line invisible
+        StartBtn.setBorderPainted(false); // outside line invisible
+        HowToBtn.setFocusable(false);
+        HowToBtn.setBorderPainted(false);
+        ExitBtn.setFocusable(false);
+        ExitBtn.setBorderPainted(false);
+
+        StartBtn.setBounds(630, 300, 160, 30); // set position
+        HowToBtn.setBounds(630, 350, 160, 30);
         ExitBtn.setBounds(630, 400, 160, 30);
-        StartBtn.setBackground(Color.decode("#EEEABA"));        //set background color
+        StartBtn.setBackground(Color.decode("#EEEABA")); // set background color
         HowToBtn.setBackground(Color.decode("#EEEABA"));
         ExitBtn.setBackground(Color.decode("#EEEABA"));
-        StartBtn.setForeground(Color.decode("#FF12345"));        //set text color
+        StartBtn.setForeground(Color.decode("#FF12345")); // set text color
         HowToBtn.setForeground(Color.decode("#FF12345"));
         ExitBtn.setForeground(Color.decode("#FF12345"));
 
@@ -150,40 +146,39 @@ public class Page extends JFrame implements KeyListener {
         // HomePanel.add(Label);
         // screen.add(HomePanel);
     }
-    
-    public static void OXGamePage(){
+
+    public static void OXGamePage() {
         jp = new JPanel();
-        ImageIcon   oxIcon = new ImageIcon("Img\\ox.png");
-        JLabel      ImgLabel = new JLabel();
+        ImageIcon oxIcon = new ImageIcon("Img\\ox.png");
+        JLabel ImgLabel = new JLabel();
 
         // Default Setting
         screen.setTitle("OXGame");
         screen.setVisible(true);
         screen.setSize(900, 630);
         screen.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        jp.setLayout(null);     //for position
+        jp.setLayout(null); // for position
         //
         Button = new ButtonImageCreate[9];
         for (int x = 0; x < Button.length; x++) {
-            Button[x] = new ButtonImageCreate(x, "Img/o.png",
-                    "Img/Player1-" + Integer.toString(x + 1) + ".png", (x + 1) * (x + 200) + (x - 50), 100, 170, 230);
+            Button[x] = new ButtonImageCreate(x, "Img/o.png", "Img/Player1-" + Integer.toString(x + 1) + ".png",
+                    (x + 1) * (x + 200) + (x - 50), 100, 170, 230);
             Button[x].addActionListener(BH);
             Button[x].addMouseListener(MH);
-            
+
         }
         // player1.setBounds(0,0,0,0);
         jp.add(player1Lab);
         // Show ox image
-        oxIcon.setImage(oxIcon.getImage().getScaledInstance(460,440,Image.SCALE_DEFAULT));
-        ImgLabel.setBounds(220,50,600,500);            //Image setting(x,y,width,heigh)
+        oxIcon.setImage(oxIcon.getImage().getScaledInstance(460, 440, Image.SCALE_DEFAULT));
+        ImgLabel.setBounds(220, 50, 600, 500); // Image setting(x,y,width,heigh)
         ImgLabel.setIcon(oxIcon);
         jp.add(ImgLabel);
 
         // player1.setImage(player1.getImage().getScaledInstance(460,440,Image.SCALE_DEFAULT));
-        // ImgLabel.setBounds(220,50,600,500);            //Image setting(x,y,width,heigh)
+        // ImgLabel.setBounds(220,50,600,500); //Image setting(x,y,width,heigh)
         // ImgLabel.setIcon(player1);
         // jp.add(ImgLabel);
-       
 
         screen.add(jp);
         screen.validate();
@@ -216,21 +211,20 @@ public class Page extends JFrame implements KeyListener {
 
     }
 
+
     public static void SpaceFlagPage() {
         ImageIcon flagIcon, flagIcon2, character, character2, srver; // server : Client VS Server(PC)
         Image image;
         JLabel flagLabel, flagLabel2, characterLabel2, srverLabel;
         int Player, role, y = 500;
-        int anPlayer, anRole = 9;
-
-
+        
         SpacePanel.setVisible(true);
         screen.setTitle("SpaceFlagPage");
         SpacePanel.setLayout(null);
         // screen.addKeyListener(Spc);
 
         role = GetRole();
-        Player = GetPlayer() + 1;
+        Player = GetPlayer();
 
         flagIcon = new ImageIcon("Img/Flag.png");
         image = flagIcon.getImage();
@@ -247,21 +241,23 @@ public class Page extends JFrame implements KeyListener {
         // Get another Player Inform
         // Problem : Connected Server but two client not connected!!
 
-        // if(Player == 1)
-        // anPlayer = 2;
-        // else
-        // anPlayer = 1;
+        if (Player == 1)
+            anPlayer = 2;
+        else
+            anPlayer = 1;
 
+
+        // RMI Function
         // try{
-        // anRole = o.GetInform(anPlayer);
-        // }catch (Exception o){
-        // System.out.println(o);
+        //     anRole = o.GetInform(anPlayer);
+        // }catch(Exception e){
+        //     System.out.println("anRole error " + e);
         // }
-
-        // character2 = new ImageIcon("Img/Player"+anPlayer+"-"+anRole+".png");
-        // image = character2.getImage();
-        // image = image.getScaledInstance(50, 70, java.awt.Image.SCALE_SMOOTH);
-        // character2 = new ImageIcon(image);
+        
+        character2 = new ImageIcon("Img/Player" + anPlayer + "-" + anRole + ".png");
+        image = character2.getImage();
+        image = image.getScaledInstance(50, 70, java.awt.Image.SCALE_SMOOTH);
+        character2 = new ImageIcon(image);
 
         srver = new ImageIcon("Img/Player" + 2 + "-" + 1 + ".png");
         image = srver.getImage();
@@ -271,94 +267,110 @@ public class Page extends JFrame implements KeyListener {
         flagLabel = new JLabel(flagIcon);
         flagLabel2 = new JLabel(flagIcon2);
         characterLabel = new JLabel(character);
-        // characterLabel2 = new JLabel(character2);
+        characterLabel2 = new JLabel(character2);
         srverLabel = new JLabel(srver);
 
         flagLabel.setBounds(200, 0, 50, 70);
         flagLabel2.setBounds(600, 0, 50, 70);
 
-        // try{
-        // y = o.Getmove(anPlayer);
-        // }catch(Exception error){
-        // System.out.println(error);
+        // RMI Function
+        // try {
+        //     y = o.Getmove(anPlayer);
+        // } catch (Exception error) {
+        //     System.out.println(error);
         // }
-        Thread playerThread = new Thread(new Runnable(){
-            public void run(){
-                if (Player == 1) {
-                    characterLabel.setBounds(600, x, 50, 70);
-                } else {
-                    characterLabel.setBounds(200, x, 50, 70);
+
+        if (Player == 1) {
+            characterLabel.setBounds(600, x, 50, 70);
+            characterLabel2.setBounds(200, y, 50, 70);
+
+        } else {
+            characterLabel.setBounds(200, x, 50, 70);
+            characterLabel2.setBounds(600, y, 50, 70);
+
+        }
+
+        KeyListener listener = new KeyListener(){
+            @Override
+            public void keyTyped(KeyEvent e) {
+                // keyTyped = Invoked when a key is typed. Uses KeyChar, char output
+                // if(e.getKeyCode() == KeyEvent.VK_SPACE ){
+                // x -= 20;
+                // characterLabel.setBounds(200, x, 50, 70);
+                // }
+        
+            }
+        
+            @Override
+            public void keyPressed(KeyEvent e) {
+                // keyPressed = Invoked when a physical key is pressed down. Uses KeyCode, int
+                // output
+                if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+                    if (player == 1)
+                        characterLabel.setBounds(200, x, 50, 70);
+        
+                    else
+                        characterLabel.setBounds(600, x, 50, 70);
+        
                 }
             }
-        });
-       
-        Thread svrThread = new Thread(new Runnable(){
-            public void run(){
-                while(s!=0){
-                    if (Player == 1) {
-                        srverLabel.setBounds(200, s, 50, 70);
-                    } else {
-                        srverLabel.setBounds(600, s, 50, 70);
-                    }
         
-                
-                    try {
-                        s = o.srverMove(10);
-                        Thread.sleep(500);
-                    } catch (Exception error) {
-                        System.out.println("s :" + error);
-                    }
-                }
+            @Override
+            public void keyReleased(KeyEvent e) {
+                x -= 5; // Change the moving speed Reference 20
+                System.out.println("Player " + player + " move");
+                // RMI Function
+                // try {
+                //     o.move((player + 1), x);
+                // } catch (Exception le) {
+                //     System.out.println(le);
+                // }
+                // if x == 0 -> win
             }
-        });
-        
-        playerThread.start();
-        svrThread.start();
+        };
+        // Thread playerThread = new Thread(new Runnable(){
+        // public void run(){
+        // if (Player == 1) {
+        // characterLabel.setBounds(600, x, 50, 70);
+        // } else {
+        // characterLabel.setBounds(200, x, 50, 70);
+        // }
+        // }
+        // });
+
+        // Thread svrThread = new Thread(new Runnable(){
+        // public void run(){
+        // while(s!=0){
+        // if (Player == 1) {
+        // srverLabel.setBounds(200, s, 50, 70);
+        // } else {
+        // srverLabel.setBounds(600, s, 50, 70);
+        // }
+
+        // try {
+        // s = o.srverMove(10);
+        // Thread.sleep(500);
+        // } catch (Exception error) {
+        // System.out.println("s :" + error);
+        // }
+        // }
+        // }
+        // });
+
+        // playerThread.start();
+        // svrThread.start();
         SpacePanel.add(flagLabel);
         SpacePanel.add(flagLabel2);
         SpacePanel.add(characterLabel);
-        // SpacePanel.add(characterLabel2);
+        SpacePanel.add(characterLabel2);
         SpacePanel.add(srverLabel);
-
+        SpacePanel.addKeyListener(listener);
+        
         screen.add(SpacePanel);
 
     }
 
-    @Override
-    public void keyTyped(KeyEvent e) {
-        // keyTyped = Invoked when a key is typed. Uses KeyChar, char output
-        // if(e.getKeyCode() == KeyEvent.VK_SPACE ){
-        // x -= 20;
-        // characterLabel.setBounds(200, x, 50, 70);
-        // }
-
-    }
-
-    @Override
-    public void keyPressed(KeyEvent e) {
-        // keyPressed = Invoked when a physical key is pressed down. Uses KeyCode, int
-        // output
-        if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-            if (player == 1)
-                characterLabel.setBounds(200, x, 50, 70);
-
-            else
-                characterLabel.setBounds(600, x, 50, 70);
-
-        }
-    }
-
-    @Override
-    public void keyReleased(KeyEvent e) {
-        x -= 5; // Change the moving speed Reference 20
-        System.out.println("Player " + player + " move");
-        try {
-            o.move((player + 1), x);
-        } catch (Exception le) {
-            System.out.println(le);
-        }
-        // if x == 0 -> win
-    }
+    
 
     public static void SetPlayerInfor() {
         inform[player] = Character;
@@ -391,22 +403,23 @@ public class Page extends JFrame implements KeyListener {
             if (myBtn.getID() == 5) {
                 PlayerPanel.setVisible(false);
                 HomePage();
-            } else if (myBtn.getID() == 4) {
+            } else if (myBtn.getID() == 4) {            //OKBtn
                 PlayerPanel.setVisible(false);
-                try {
-                    Character = o.PlayerSelection(GetPlayer(), ExistsLastClick());
-                    System.out.println("You chose Role " + Character);
-                } catch (Exception ke) {
-                    System.out.println(ke);
-                }
+                // RMI Function
+                // try {
+                //     Character = o.PlayerSelection(GetPlayer(), ExistsLastClick());
+                //     System.out.println("You chose Role " + Character);
+                // } catch (Exception ke) {
+                //     System.out.println(ke);
+                // }
 
-                try {
-                    o.SetInform(player, Character);
-                    System.out.println("In");
-
-                } catch (Exception er) {
-                    System.out.println(er + " " + player);
-                }
+                // try {
+                //     o.SetInform(player, Character);
+                //     System.out.println("Player "+player +" chose "+Character);
+                // } catch (Exception er) {
+                //     System.out.println(er + " " + player);
+                // }
+                // Local Function
                 // SetPlayerInfor();
                 // System.out.println("SetPlayerInfor : "+ "[" + player +"]" + " = "
                 // +inform[player]);
@@ -453,6 +466,7 @@ public class Page extends JFrame implements KeyListener {
     }
 
 }
+
 
 class ButtonImageCreate extends JButton {
     private Image image, imageHover;

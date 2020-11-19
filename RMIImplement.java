@@ -6,6 +6,7 @@ public class RMIImplement extends UnicastRemoteObject implements Interface
 {
     public int Role;
     public static int PlayerNum = 1;
+    public static int playerStatus[] = new int [2];         // Player Login and Logout Status
     public static int playerInform[] = new int[2];            // [role]
     public static int Moving[] = new int[2];
     public static int s = 500;
@@ -16,7 +17,10 @@ public class RMIImplement extends UnicastRemoteObject implements Interface
     
     public synchronized int GetPlayerNum () throws java.rmi.RemoteException{
         PlayerNum = (PlayerNum + 1 )% 2;
-        System.out.println(PlayerNum);
+        System.out.println("Player "+(PlayerNum+1)+ " Login!");
+        if(PlayerNum == 1){
+            System.out.println("---------------------------------");
+        }
         return PlayerNum;
     }
 	public synchronized int PlayerSelection(int Player , int Role) throws java.rmi.RemoteException{
