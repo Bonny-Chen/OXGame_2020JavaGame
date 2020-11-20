@@ -19,7 +19,7 @@ public class SocketSrver implements Runnable {
 
 	private Thread thread;						// create for run()
 	private boolean yourTurn = false;
-	public boolean accpected = false;			// accpeted to client
+	public static boolean accpected = false;			// accpeted to client
 
 	private String ip = "localhost";
 	private int port = 6666;
@@ -39,7 +39,7 @@ public class SocketSrver implements Runnable {
 
 	
 	public void run(){
-		page = new Page();
+		// page = new Page();
 		while(true){
 			CheckConnection();
 			if(!accpected){			// accpected == False
@@ -58,6 +58,9 @@ public class SocketSrver implements Runnable {
 		}
 	}
 
+	public static boolean StableConnect(){
+		return accpected;
+	}
 	private void CheckConnection(){
 		int receiveValue = 0;
 		try{
@@ -66,8 +69,7 @@ public class SocketSrver implements Runnable {
 			// System.out.println("CheckConnection() Error : "+e);
 		}
 		if(receiveValue != 1){
-			System.out.println("Client Leave !");
-			
+			System.out.println("No Client online !");
 			accpected = false;
 		}
 	}

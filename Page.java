@@ -10,8 +10,8 @@ import java.nio.ByteBuffer;
 
 public class Page extends Thread {
     public static Interface o = null;
-    public static Thread thread;
-    SocketSrver socketSrver;
+    // public static Thread thread;
+    public static SocketSrver socketSrver;
     public static JPanel PlayerPanel = new JPanel(); // PlayerSelectionPage's Panel
     public static JPanel SpacePanel = new JPanel(); // SpaceFlagPage's Panel
     private static JPanel jp;
@@ -27,6 +27,12 @@ public class Page extends Thread {
     public static int s = 500; // use for recording server moving
     private static ImageIcon player1;
     private static JLabel player1Lab = new JLabel();
+    private static JPanel glassPanel = new JPanel();
+    private static JLabel blockingLabel = new JLabel();
+    private static JLabel WaitingMsg = new JLabel("Waiting For Client...");
+
+    // private static JButton StartBtn = new JButton("START");
+    // private static JButton HowToBtn = new JButton("HOW TO");
     int round = 0;
 
     Page() {
@@ -40,7 +46,7 @@ public class Page extends Thread {
         // } catch (Exception e) {
         //     System.out.println("Server lookup exception: " + e.getMessage());
         // }
-        screen.setTitle("HomePage");
+
         screen.setVisible(true);
         screen.setSize(900, 630);
         screen.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -51,14 +57,35 @@ public class Page extends Thread {
 
     public static void main(String args[]) {
         Page page = new Page();
-        thread = new Thread();
-        thread.start();
+        socketSrver = new SocketSrver(); 
+        glassPanel.setOpaque(false);
+        glassPanel.add(blockingLabel);
+        glassPanel.addMouseListener(new MouseAdapter() {});
+        // glassPanel.addMouseMotionListener(new MouseMotionAdapter() {});
+        glassPanel.addKeyListener(new KeyAdapter() {});
+        screen.setGlassPane(glassPanel);
+        while(true){
+            // Block All Button Until Client Join
+            if(!socketSrver.StableConnect()){
+                screen.setTitle("Waiting For Connection");
+                glassPanel.add(WaitingMsg);
+                WaitingMsg.setFont(new Font("Serif", Font.BOLD, 48));
+                WaitingMsg.setForeground(Color.RED);
+                glassPanel.setVisible(true);
+                blockingLabel.requestFocus();
+            }
+            else{
+                screen.setTitle("HomePage");
+                glassPanel.setVisible(false);
+                // screen.remove(glassPanel);
+            }
+        }
+
     }
 
     public void run(){
-        // while(!socketSrver.accpected){
-        //     screen.disp
-        // }
+        // System.out.println(socketSrver.StableConnect());
+        
     }
 
     static ButtonImageCreate[] Button;
