@@ -1,36 +1,50 @@
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Shape;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.geom.Ellipse2D;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-public class OXGamepage {
-/**
-* @param args
-*/
-public static void main(String[] args) {
-final Shape cycle =new Ellipse2D.Double(10,10,100,100);
-final JFrame f=new JFrame();
-f.setDefaultCloseOperation(3);
-f.setSize(300,300);
-JLabel l=new JLabel(){
-private static final long serialVersionUID = 5045688487186402437L;
-public void paint(Graphics g){
-g.setColor(Color.red);
-((java.awt.Graphics2D)g).draw(cycle);
-}
-};
-l.addMouseListener(new MouseAdapter(){
-public void mousePressed(MouseEvent e){
-    if(cycle.contains(e.getPoint()))
-    f.setTitle(String.format("In cycle. x:%d y:%d",e.getX(),e.getY()));
-    else
-    f.setTitle(null);
+import java.io.*;
+import java.util.*;
+import java.security.*;
+// import javax.xml.bind.*;
+import java.lang.*;
+import java.awt.*;
+import javax.swing.*;
+
+public class OXGamepage
+{
+
+    public static class GridPanel extends JPanel 
+    {
+        public GridPanel()
+        {
+            setLayout(new GridLayout(2,3));
+            setBackground(Color.GREEN);
+            this.setPreferredSize(new Dimension(500,200));
+
+            JButton b1 = new JButton ("Button 1");
+            JButton b2 = new JButton ("Button 2");
+            JButton b3 = new JButton ("Button 3");
+            JButton b4 = new JButton ("Button 4");
+            JButton b5 = new JButton ("Button 5");
+            JButton b6 = new JButton ("Button 6");
+
+            add(b1);
+            add(b2);
+            add(b3);
+            add(b4);
+            add(b5);
+            add(b6);
+        }
+
     }
-});
-f.add(l);
-f.setVisible(true);
-}
+
+
+
+    public static void main(String[] args) 
+
+    {
+       GridPanel gp = new GridPanel();
+       JFrame jf = new JFrame();
+       jf.add(gp);
+       jf.pack(); //code wouldnt work if i comment out this line
+       jf.setVisible(true);
+
+    }
+
 }
