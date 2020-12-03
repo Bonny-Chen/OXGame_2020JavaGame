@@ -5,87 +5,204 @@ import java.rmi.*;
 
 import java.net.*;
 import java.io.*;
+import java.nio.channels.AcceptPendingException;
 import java.nio.channels.SocketChannel;
 import java.nio.ByteBuffer;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.net.Socket;
 
 public class Page extends Thread {
     public static Interface o = null;
     // public static Thread thread;
     public static SocketSrver socketSrver;
+    public static SocketClient socketClient;
+    private static Socket s1 = null;
+    private static String line = null;
+    private static BufferedReader br = null;
+    private static BufferedReader is = null;
+    private static PrintWriter os = null;
+    private static String response = null;
+    private static Socket socket = null;
+    private static ServerSocket srvsocket = null;
+    private static boolean accepted = false;
+    private static boolean onlineCheck = false;
+
+
     public static JPanel PlayerPanel = new JPanel(); // PlayerSelectionPage's Panel
     public static JPanel SpacePanel = new JPanel(); // SpaceFlagPage's Panel
     private static JPanel jp;
     public static JFrame screen = new JFrame();
     public static JLabel characterLabel;
-    public static Integer player;
-    public static Integer onlinePlayer=0;
+    public static Integer player = -1;
+    public static Integer onlinePlayer = 0;
     public static Integer Character = 9;
     public static Integer anRole = 9;
     public static Integer anPlayer;
     public static int inform[] = new int[2];
     public static int x = 500;
+    public static int y = 500;
     public static int s = 500; // use for recording server moving
     private static ImageIcon player1;
     private static JLabel player1Lab = new JLabel();
     private static JPanel glassPanel = new JPanel();
     private static JLabel blockingLabel = new JLabel();
     private static JLabel WaitingMsg = new JLabel("Waiting For Client...");
-
-    // private static JButton StartBtn = new JButton("START");
-    // private static JButton HowToBtn = new JButton("HOW TO");
-    int round = 0;
+    public static boolean windowClosed = false;
+    public static int role = -1;            // use for spaceFlag Page (Player's role Get)
+    public static int theRound = 4;         // theRound = 1 is Player1's Round , theRound = 2 is Player2's Round , theRound = 4 is default(Error)
 
     Page() {
-        // RMI Function
-        // try {
-        //     o = (Interface) Naming.lookup("rmi://127.0.0.1/OXGame");
-        //     System.out.println("RMI server connected");
-        //     player = o.GetPlayerNum();
-        //     System.out.println("Player " + player + " login");
-
-        // } catch (Exception e) {
-        //     System.out.println("Server lookup exception: " + e.getMessage());
-        // }
-
         screen.setVisible(true);
         screen.setSize(900, 630);
         screen.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        screen.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent e) {
+                windowClosed = true;
+                e.getWindow().dispose();
+                System.out.println("JFrame Closed!");
+            }
+        });
         HomePage();
+        
         screen.validate();
 
     }
 
-    public static void main(String args[]) {
-        Page page = new Page();
-        socketSrver = new SocketSrver(); 
+    public static boolean ClosedWindow() {
+        return windowClosed;
+    }
+
+    private static boolean Connected() {
+        return accepted;
+    }
+
+    private static void Connection(int Port , String Message){
+        try
+		{
+			// Creates a socket channel 
+			SocketChannel sc = SocketChannel.open();
+			sc.configureBlocking(false);
+			sc.connect(new InetSocketAddress("127.1", Port));
+
+            // if the socket has connected, sc.finishConnect() will return false
+            for (int loopcount = 0 ; !sc.finishConnect() ; loopcount++)
+            {
+                // do something 
+                System.out.println("Loop count = " + loopcount);
+                try 
+                {
+                    Thread.sleep(1000);
+                } 
+                catch (InterruptedException e) 
+                {
+                    System.err.println(e);
+                }
+            }
+			// Connection established
+
+			// messages from args[2] and args[3]
+			for(int i = 1 ; i < 3 ; i++) // messages from args[2] and args[3]
+			{
+				// Send message to server
+                ByteBuffer buffer = ByteBuffer.wrap("Client Login".getBytes());
+                if(Port == 8884 || Port == 8885){
+                    buffer = ByteBuffer.wrap(Message.getBytes());
+                }
+				sc.write(buffer);
+
+				// Receive message
+				ByteBuffer 	b = ByteBuffer.allocate(1000); 
+				int			len = sc.read(b);	// read message from sc (non-blocking)
+				while(len == 0)
+				{
+                	try 
+                	{
+                    	Thread.sleep(100);
+                	} 
+                	catch (InterruptedException e) 
+                	{
+                    	System.err.println(e);
+                	}
+					System.out.print("+"); // do something
+					len = sc.read(b);
+				}
+                System.out.println(new String(b.array(), 0, len));
+                
+                if(new String(b.array(), 0, len).startsWith("1") && Port == 8880){
+                    player = Integer.parseInt(new String(b.array(), 0, len));
+                }else if(new String(b.array(), 0, len).startsWith("2") && Port == 8881){
+                    player = Integer.parseInt(new String(b.array(), 0, len));
+                }else if(Port == 8886 || Port == 8887){
+                    if( new String(b.array(), 0, len).startsWith("0") ||new String(b.array(), 0, len).startsWith("1") || new String(b.array(), 0, len).startsWith("2") || new String(b.array(), 0, len).startsWith("9")){
+                        role = Integer.parseInt(new String(b.array(), 0, len));
+                    }
+                }
+
+                if(Port == 8883){
+                    if(new String(b.array(), 0, len).startsWith("true") || new String(b.array(), 0, len).startsWith("false")){
+                        onlineCheck = Boolean.parseBoolean(new String(b.array(), 0, len));
+                    }
+                }
+                
+                
+                if(Port == 8882){
+                    if( new String(b.array(), 0, len).startsWith("0") ||new String(b.array(), 0, len).startsWith("1")){
+                        
+                    }
+                }
+			}
+			sc.close();
+		}
+		catch(IOException e)
+		{
+			e.printStackTrace();
+        }
+    }
+    public static void main(String args[]) throws IOException {
+        InetAddress address = InetAddress.getLocalHost();
+        socketSrver = new SocketSrver();
+        if(args.length < 2)
+		{
+		    System.out.println("Usage: java MultiPortClient server_ip port ");
+		    System.exit(1);
+		}
+        Connection(Integer.parseInt(args[1]),"");
+        Connection(8883,"");
+
+        System.out.println("player = " + player);
+        
         glassPanel.setOpaque(false);
         glassPanel.add(blockingLabel);
-        glassPanel.addMouseListener(new MouseAdapter() {});
-        // glassPanel.addMouseMotionListener(new MouseMotionAdapter() {});
-        glassPanel.addKeyListener(new KeyAdapter() {});
+        glassPanel.addMouseListener(new MouseAdapter() {
+        });
+        glassPanel.addKeyListener(new KeyAdapter() {
+        });
         screen.setGlassPane(glassPanel);
-        while(true){
-            // Block All Button Until Client Join
-            if(!socketSrver.StableConnect()){
+        Page page = new Page();
+        while (true) {
+           
+            if (!onlineCheck) {
                 screen.setTitle("Waiting For Connection");
                 glassPanel.add(WaitingMsg);
                 WaitingMsg.setFont(new Font("Serif", Font.BOLD, 48));
                 WaitingMsg.setForeground(Color.RED);
                 glassPanel.setVisible(true);
                 blockingLabel.requestFocus();
-            }
-            else{
-                screen.setTitle("HomePage");
+                Connection(8883,"");
+            } else {
+                screen.setTitle("HomePage"+"-Player "+player);
                 glassPanel.setVisible(false);
-                // screen.remove(glassPanel);
+                screen.remove(glassPanel);
+
+                break;
             }
         }
 
-    }
-
-    public void run(){
-        // System.out.println(socketSrver.StableConnect());
-        
     }
 
     static ButtonImageCreate[] Button;
@@ -93,6 +210,7 @@ public class Page extends Thread {
     static MouseHandler MH = new MouseHandler();
 
     public static void HomePage() {
+        // System.out.println("You are Player "+ player);
         jp = new JPanel();
         JButton StartBtn = new JButton("START");
         JButton HowToBtn = new JButton("HOW TO");
@@ -102,7 +220,7 @@ public class Page extends Thread {
         JLabel ImgLabel = new JLabel();
 
         // Default Setting
-        screen.setTitle("Home Page");
+        screen.setTitle("Home Page"+"-Player "+player);
         screen.setVisible(true);
         screen.setSize(900, 630);
         screen.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -140,7 +258,7 @@ public class Page extends Thread {
             public void actionPerformed(ActionEvent e) {
                 // System.out.println("Btn Click");
                 screen.remove(jp); // Clear the screen
-                screen.setTitle("Player Select");
+                screen.setTitle("Player Select"+"-Player "+player);
                 PlayerSelectionPage();
                 screen.validate();
             }
@@ -180,7 +298,7 @@ public class Page extends Thread {
         JLabel ImgLabel = new JLabel();
 
         // Default Setting
-        screen.setTitle("OXGame");
+        screen.setTitle("OXGame"+"-Player "+player);
         screen.setVisible(true);
         screen.setSize(900, 630);
         screen.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -210,26 +328,28 @@ public class Page extends Thread {
         screen.add(jp);
         screen.validate();
     }
+
     public static void PlayerSelectionPage() {
         PlayerPanel.setVisible(true);
-        screen.setTitle("PlayerSelectionPage");
+        screen.setTitle("PlayerSelectionPage"+"-Player "+player);
         PlayerPanel.setBackground(Color.decode("#000339"));
         PlayerPanel.setLayout(null);
-
         Button = new ButtonImageCreate[6];
         for (int x = 0; x < Button.length; x++) {
-            Button[x] = new ButtonImageCreate(x, "Img/Player1-" + Integer.toString(x + 1) + "UnSelected.png",
-                    "Img/Player1-" + Integer.toString(x + 1) + ".png", (x + 1) * (x + 200) + (x - 50), 100, 170, 230);
+            Button[x] = new ButtonImageCreate(x, "Img/Player1-" + Integer.toString(x) + "UnSelected.png",
+                    "Img/Player1-" + Integer.toString(x) + ".png", (x + 1) * (x + 200) + (x - 50), 100, 170, 230);
             Button[x].addActionListener(BH);
             Button[x].addMouseListener(MH);
             PlayerPanel.add(Button[x]);
         }
 
+        // OK Button
         Button[4] = new ButtonImageCreate(4, "Img/OKBTN-UnSelected.png", "Img/OKBTN.png", 355, 450, 150, 70);
         Button[4].addActionListener(BH);
         Button[4].addMouseListener(MH);
         PlayerPanel.add(Button[4]);
 
+        // Back To Home Button
         Button[5] = new ButtonImageCreate(5, "Img/Back.png", "Img/Back.png", 30, 30, 50, 50);
         Button[5].addActionListener(BH);
         Button[5].addMouseListener(MH);
@@ -238,21 +358,23 @@ public class Page extends Thread {
 
     }
 
-
     public static void SpaceFlagPage() {
         ImageIcon flagIcon, flagIcon2, character, character2, srver; // server : Client VS Server(PC)
         Image image;
         JLabel flagLabel, flagLabel2, characterLabel2, srverLabel;
-        int Player, role, y = 500;
         
         SpacePanel.setVisible(true);
-        screen.setTitle("SpaceFlagPage");
+        screen.setTitle("SpaceFlagPage"+"-Player "+player);
         SpacePanel.setLayout(null);
-        // screen.addKeyListener(Spc);
-
-        role = GetRole();
-        Player = GetPlayer();
-
+        SpacePanel.setFocusable(true);
+        SpacePanel.requestFocus(); 
+        if(player == 1){
+            Connection(8886,"");
+        }else if(player == 2){
+            Connection(8887,"");
+        }
+        System.out.println("Player: " + player);
+        System.out.println("role = " + role);
         flagIcon = new ImageIcon("Img/Flag.png");
         image = flagIcon.getImage();
         image = image.getScaledInstance(50, 70, java.awt.Image.SCALE_SMOOTH);
@@ -260,7 +382,7 @@ public class Page extends Thread {
 
         flagIcon2 = flagIcon;
 
-        character = new ImageIcon("Img/Player" + Player + "-" + role + ".png");
+        character = new ImageIcon("Img/Player" + player + "-" + role + ".png");
         image = character.getImage();
         image = image.getScaledInstance(50, 70, java.awt.Image.SCALE_SMOOTH);
         character = new ImageIcon(image);
@@ -268,20 +390,29 @@ public class Page extends Thread {
         // Get another Player Inform
         // Problem : Connected Server but two client not connected!!
 
-        if (Player == 1)
+        if (player == 1){
             anPlayer = 2;
-        else
+            Connection(8887,"");
+            anRole = role;
+            while(anRole == 9){
+                Connection(8887,"");
+                anRole = role;
+            }
+        }
+        else if (player == 2){
             anPlayer = 1;
+            Connection(8886,"");
+            anRole = role;
+            while(anRole == 9){
+                Connection(8886,"");
+                anRole = role;
+            }
+        }
 
-
-        // RMI Function
-        // try{
-        //     anRole = o.GetInform(anPlayer);
-        // }catch(Exception e){
-        //     System.out.println("anRole error " + e);
-        // }
         
-        character2 = new ImageIcon("Img/Player" + anPlayer + "-" + anRole + ".png");
+        System.out.println("anPlayer = " + anPlayer);
+        System.out.println("anRole = " + anRole);
+        character2 = new ImageIcon("Img/Player" + Integer.toString(anPlayer) + "-" + Integer.toString(anRole) + ".png");
         image = character2.getImage();
         image = image.getScaledInstance(50, 70, java.awt.Image.SCALE_SMOOTH);
         character2 = new ImageIcon(image);
@@ -302,12 +433,12 @@ public class Page extends Thread {
 
         // RMI Function
         // try {
-        //     y = o.Getmove(anPlayer);
+        // y = o.Getmove(anPlayer);
         // } catch (Exception error) {
-        //     System.out.println(error);
+        // System.out.println(error);
         // }
 
-        if (Player == 1) {
+        if (player == 1) {
             characterLabel.setBounds(600, x, 50, 70);
             characterLabel2.setBounds(200, y, 50, 70);
 
@@ -317,42 +448,39 @@ public class Page extends Thread {
 
         }
 
-        KeyListener listener = new KeyListener(){
+        KeyListener listener = new KeyListener() {
             @Override
             public void keyTyped(KeyEvent e) {
-                // keyTyped = Invoked when a key is typed. Uses KeyChar, char output
-                // if(e.getKeyCode() == KeyEvent.VK_SPACE ){
-                // x -= 20;
-                // characterLabel.setBounds(200, x, 50, 70);
-                // }
-        
             }
-        
+
             @Override
             public void keyPressed(KeyEvent e) {
                 // keyPressed = Invoked when a physical key is pressed down. Uses KeyCode, int
                 // output
+                System.out.println("KeyPressed");
+
                 if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-                    if (player == 1)
-                        characterLabel.setBounds(200, x, 50, 70);
-        
-                    else
+                    System.out.println("move");
+
+                    if (player == 1){
                         characterLabel.setBounds(600, x, 50, 70);
-        
+                        characterLabel2.setBounds(200, y, 50, 70);
+                    }else if (player == 2){
+                        characterLabel.setBounds(200, x, 50, 70);
+                        characterLabel2.setBounds(600, y, 50, 70);
+                    }
+                        
+                    
+
                 }
             }
-        
+
             @Override
             public void keyReleased(KeyEvent e) {
-                x -= 5; // Change the moving speed Reference 20
-                System.out.println("Player " + player + " move");
-                // RMI Function
-                // try {
-                //     o.move((player + 1), x);
-                // } catch (Exception le) {
-                //     System.out.println(le);
-                // }
-                // if x == 0 -> win
+                if(player == 1)
+                    x -= 5; // Change the moving speed Reference 20
+                else if(player == 2)
+                    y -= 5;
             }
         };
         // Thread playerThread = new Thread(new Runnable(){
@@ -392,66 +520,40 @@ public class Page extends Thread {
         SpacePanel.add(characterLabel2);
         SpacePanel.add(srverLabel);
         SpacePanel.addKeyListener(listener);
-        
         screen.add(SpacePanel);
 
     }
 
-    
-
-    public static void SetPlayerInfor() {
-        inform[player] = Character;
-    }
-
-    public static int GetPlayer() {
-        return player;
-    }
-
-    public static int GetRole() {
-        return Character;
-    }
-
     private static class ButtonHandler implements ActionListener {
         private Integer LastClick = -1;
+        Page page;
 
         @Override
         public void actionPerformed(ActionEvent e) {
             ButtonImageCreate myBtn = (ButtonImageCreate) e.getSource();
             ButtonImageCreate tmpBtn = myBtn;
+            // ?
             if (ExistsLastClick() >= 0 && ExistsLastClick() != 4) {
-
+                Character = ExistsLastClick();
                 System.out.println("LastClick " + ExistsLastClick());
                 tmpBtn = Button[ExistsLastClick()]; // Control LastClick Button
                 tmpBtn.setIcon(tmpBtn.icon);
                 tmpBtn.setClick(0); // Formate the setting of Button Click
+
             }
 
             // Switch to HomePage
             if (myBtn.getID() == 5) {
                 PlayerPanel.setVisible(false);
                 HomePage();
-            } else if (myBtn.getID() == 4) {            //OKBtn
+            } else if (myBtn.getID() == 4) { // OKBtn
                 PlayerPanel.setVisible(false);
-                // RMI Function
-                // try {
-                //     Character = o.PlayerSelection(GetPlayer(), ExistsLastClick());
-                //     System.out.println("You chose Role " + Character);
-                // } catch (Exception ke) {
-                //     System.out.println(ke);
-                // }
-
-                // try {
-                //     o.SetInform(player, Character);
-                //     System.out.println("Player "+player +" chose "+Character);
-                // } catch (Exception er) {
-                //     System.out.println(er + " " + player);
-                // }
-                // Local Function
-                // SetPlayerInfor();
-                // System.out.println("SetPlayerInfor : "+ "[" + player +"]" + " = "
-                // +inform[player]);
-
-                // switch to GamePage()
+                if(player == 1){
+                    System.out.println("Character : "+Integer.toString(Character));
+                    Connection(8884,Integer.toString(Character));
+                }else if(player == 2){
+                    Connection(8885,Integer.toString(Character));
+                }
                 SpaceFlagPage();
             }
             myBtn.setIcon(myBtn.iconHover);
@@ -493,7 +595,6 @@ public class Page extends Thread {
     }
 
 }
-
 
 class ButtonImageCreate extends JButton {
     private Image image, imageHover;

@@ -7,7 +7,7 @@ public class GlassExample extends JFrame {
     JPanel glass = new JPanel(new GridLayout(0, 1));
     // add a label to help trap focus while the glass pane is active
     JLabel padding = new JLabel();
-    JProgressBar waiter = new JProgressBar(0, 100);
+    JProgressBar waiter = new JProgressBar(0, 30);
     Timer timer;
      
     public GlassExample() {
@@ -84,7 +84,7 @@ public class GlassExample extends JFrame {
                 int progress = 0;
                  
                 public void actionPerformed(ActionEvent A) {
-                    progress += 10;
+                    progress = (progress + 10) % 40 ;
                     waiter.setValue(progress);
                      
                     // Once we hit 100%, remove the glass pane and 
