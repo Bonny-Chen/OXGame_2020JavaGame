@@ -3,80 +3,86 @@ import java.awt.event.*;
 import javax.swing.*;
 
 
-public class TicTacToe2 extends JPanel
+public class TicTacToe2
 {
-    private oxButton[] oxbtn;
-    int round=0;
+    private static oxButton[] oxbtn;
+    static int round=0;
+   
     
-    public TicTacToe2()
+    public static void initialize()
     {
-      //setLayout(new GridLayout(3,3));
-      setLayout(null);
-      initializebuttons();
-    }
-    
-    public void initializebuttons()
-    {
+        JPanel      jp = new JPanel();
+        JFrame window = new JFrame("Tic-Tac-Toe");
+        window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+       // window.getContentPane().add(new TicTacToe2());
+        window.setSize(900, 630);
+        window.setVisible(true);
+        
+        jp.setLayout(null);
+        jp.setVisible(true);
+
+
+
         ImageIcon   logoIcon = new ImageIcon("Img\\ox.png");
         JLabel      ImgLabel = new JLabel();
         // Show image
         logoIcon.setImage(logoIcon.getImage().getScaledInstance(350,330,Image.SCALE_DEFAULT));
         ImgLabel.setBounds(280,0,600,600);            //Image setting(x,y,width,heigh)
         ImgLabel.setIcon(logoIcon);
-        add(ImgLabel);
+        jp.add(ImgLabel);
 
         oxbtn = new oxButton[9];
         buttonListener bh = new buttonListener();
         for(int x=0; x<9; x++){
-            int i=0;
             oxbtn[x] = new oxButton(x);
             oxbtn[x].addActionListener(bh);
             oxbtn[x].setFocusable(false);           //inside line invisible
             oxbtn[x].setBorderPainted(false);       //outside line invisible
+
             if(x<3)oxbtn[x].setBounds(x*105+302, 153, 100, 95);
             else if(x<6)oxbtn[x].setBounds((x-3)*105+302, 250, 100, 95);
             else if(x<9)oxbtn[x].setBounds((x-6)*105+302, 348, 100, 95);
-            add(oxbtn[x]);
-            i++;
-            if(i==3)i=0;
+            jp.add(oxbtn[x]);
         }
+        window.add(jp);
+        window.validate();
      
   
         
     }
-    public void resetButtons()
+    public static void resetButtons()
     {
         for(int i = 0; i < 9; i++)
         {
             oxbtn[i].setContentAreaFilled(true);
             oxbtn[i].resetPressed(false);
-            oxbtn[i].setText("");
+            oxbtn[i].setIndex(0);
             oxbtn[i].setIcon(null);
             round=0;
         }
     }
     
-    private class buttonListener implements ActionListener
+    private static class buttonListener implements ActionListener
     {
         private ImageIcon iconO=new ImageIcon("Img\\o.png");
         private ImageIcon iconX = new ImageIcon("Img\\x.png");
         private int whowin=0;
+        
         public void actionPerformed(ActionEvent e) 
         {
-            
             oxButton myBtn = (oxButton)e.getSource();
             if(!myBtn.getPressed()){
                 if(round%2==0){
                     iconO.setImage(iconO.getImage().getScaledInstance(100,100,Image.SCALE_DEFAULT));
                     myBtn.setIcon(iconO);
-                    myBtn.setText("O");
+                    myBtn.setIndex(1);
                     myBtn.setContentAreaFilled(false);   // Remove Btn Background
                    
                 }
                 else if(round%2==1){
                     iconX.setImage(iconX.getImage().getScaledInstance(100,100,Image.SCALE_DEFAULT));
                     myBtn.setIcon(iconX);
-                    myBtn.setText("X");
+                    myBtn.setIndex(2);
                     myBtn.setContentAreaFilled(false);   // Remove Btn Background
                 }
                 round++;
@@ -86,13 +92,13 @@ public class TicTacToe2 extends JPanel
             
             if(Win() == true&&whowin==1){ 
                 JOptionPane.showConfirmDialog(null, "O win");       
-                // System.out.println("O win");
+                //System.out.println("O win");
                 resetButtons();
 
             }
             else if(Win() == true&&whowin==2){   
                 JOptionPane.showConfirmDialog(null, "X win");            
-                // System.out.println("X win");
+                //System.out.println("X win");
                 resetButtons();
 
             }
@@ -135,51 +141,44 @@ public class TicTacToe2 extends JPanel
         
         public boolean check(int a, int b,int c)
         {
-            if ( oxbtn[a].getText().equals(oxbtn[b].getText()) &&oxbtn[b].getText().equals(oxbtn[c].getText()) && !oxbtn[a].getText().equals("")){
-                if(oxbtn[a].getText().equals("O")){
+            if ( oxbtn[a].getIndex()==oxbtn[b].getIndex() &&oxbtn[b].getIndex()==oxbtn[c].getIndex() && oxbtn[a].getIndex()!=0){
+                if(oxbtn[a].getIndex()==1){
                     whowin =1;
                 }
-                else if(oxbtn[a].getText().equals("X")){
+                else if(oxbtn[a].getIndex()==2){
                     whowin =2;
                 }
-
                 return true;
             }
-                
-            else
-                return false;
+            else return false;
         }
         
     }
     
     public static void main(String[] args) 
     {
-        JFrame window = new JFrame("Tic-Tac-Toe");
-        window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        window.getContentPane().add(new TicTacToe2());
-        //window.setBounds(300,200,700,700);
-        window.setSize(900, 630);
-        window.setVisible(true);
+        initialize();
+        
     }
 }
 class oxButton extends JButton
 {
     private int id;
+    private int index;
     private boolean isPressed;
-
-    String buttonName;
 
     public oxButton(int id){
         this.id =id;
+        this.index = 0;
         isPressed = false;        
     }
-
- 
-    public int getID() {
+   public int getID() {
         return id;
     }
-
-  
+    public int getIndex(){
+        return index;
+    }
+    
     public boolean getPressed(){
         return isPressed;
     } 
@@ -188,5 +187,8 @@ class oxButton extends JButton
     }   
     public void resetPressed(boolean isPressed){
         this.isPressed = false;
+    }
+    public void setIndex(int num){
+        this.index = num;
     }
 }

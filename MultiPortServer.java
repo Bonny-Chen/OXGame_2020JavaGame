@@ -18,6 +18,7 @@ public class MultiPortServer
 	public static int in8881 = 0;
 	public static int in8880 = 0;
 	public static int in8882 = 0;
+	public static int BlockWhile = 0;
 	public static int round = 0;							// Player 1's Round = 1 ; Player 2's Round = 2;
 	public static int[] role = new int[3];				// Saving two player's role
 
@@ -52,12 +53,13 @@ public class MultiPortServer
 		}
 		
 		// The main loop waiting for events
-		while(true)
-		{
+		while(true){
 		    // The following method blocks until 
 		    // at least one of the registered events occurs.
 			int num = selector.select();
-			
+			if(BlockWhile==1){
+				break;
+			}
 			// Returns a Set of the SelectionKey objects 
 			// for which events have occurred
 			Set selectedKeys = selector.selectedKeys();

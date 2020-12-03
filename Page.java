@@ -151,7 +151,7 @@ public class Page extends Thread {
                 
                 
                 if(Port == 8882){
-                    if( new String(b.array(), 0, len).startsWith("0") ||new String(b.array(), 0, len).startsWith("1")){
+                    if( new String(b.array(), 0, len).startsWith("2") ||new String(b.array(), 0, len).startsWith("1")){
                         
                     }
                 }
