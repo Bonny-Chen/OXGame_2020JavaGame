@@ -496,7 +496,7 @@ public class pagetest extends Thread {
             
             if(!myBtn.getPressed()){    //button not pressed
                 // Btn -> send         
-                // Player 1 -> O Player2-> X , port 8888-> get button index(0~8) 
+                // Player 1 -> O Player2-> X , port 8888-> send button index(0~8) 
                 if(player == 1){
                         Connection(8888, Integer.toString(myBtn.getID()+10));   //player1 button index +10 send to port 8888
                         iconO.setImage(iconO.getImage().getScaledInstance(100,100,Image.SCALE_DEFAULT));

@@ -1,13 +1,6 @@
-//************************************************************************
-//*  Network Programming - Final Project (OXGame)                        *
-//*  Program Name: Page.java                                             *
-//*  Run Program Player 1: java Page 127.1 8880                          *
-//*  Run Program Player 2: java Page 127.1 8881                          *
-//*  The program connects to BR and receive message.					 *
-//*  The program join an multicastgroup and receive message from there.  *
-//*  2020.11.29                                                          *
-//************************************************************************
 import java.awt.*;
+
+import javax.management.relation.Role;
 import javax.swing.*;
 import java.awt.event.*;
 import java.net.*;
@@ -33,6 +26,7 @@ public class Page {
     public static Integer player = -1;
     public static Integer onlinePlayer = 0;
     public static Integer Character = 9;
+    public static ImageIcon icon;
     public static Integer anRole = 9;
     public static Integer anPlayer = 100;
     public static int inform[] = new int[2];
@@ -47,20 +41,22 @@ public class Page {
     private static JPanel GPanel2 = new JPanel(); // Use For OXGamePage()
     private static JLabel blockingLabel = new JLabel();
     private static JLabel TurnMsg = new JLabel("Not Your Turn");
-    private static JLabel WaitingMsg = new JLabel("Waiting For Client...");
+    private static ImageIcon waitiIcon = new ImageIcon("Img/WaitingMsg.png");
+    private static JLabel WaitingMsg = new JLabel(waitiIcon);
     public static boolean windowClosed = false;
     public static int role = -1; // Use for SpaceFlagPage (Player's role Get)
-    public static int theRound = 0; // theRound = 1 is Player1's Round , theRound = 2 is Player2's Round , theRound
-                                    // = 0 is default(Error)
-    public static int winner = 0; // Use for SpaceFlagPage to determine who is the winner , winner = 1 Player 1
-                                  // win , winner = 2 Player 2 win , winner = 0 no one win (Default)
-    public static int gridChecked = 0; // gridChecked = 0 is Not Clicked (Default) , gridChecked = 1 is Player1 clicked
-                                       // , gridChecked = 2 is Player2 clicked
-    public static ButtonImageCreate[] Btn;
+    public static int selfrole = -1;
+    public static int theRound = 0; // theRound = 1 is Player1's Round , theRound = 2 is Player2's Round , theRound = 0 is default(Error)
+    public static int winner = 0; // Use for SpaceFlagPage to determine who is the winner , winner = 1 Player 1 win , winner = 2 Player 2 win , winner = 0 no one win (Default)
+    public static int gridChecked = 0; // gridChecked = 0 is Not Clicked (Default) , gridChecked = 1 is Player1 clicked , gridChecked = 2 is Player2 clicked
+    public static ButtonImageCreate[] Btn = new ButtonImageCreate[9];
     public static int IsYourTurn = 0; // IsYourTurn = 0 is not your turn , 1 is your turn
+    public static int OKBtnCount = 0;
+    public static int timeOn = 0;
 
     Page() {
         screen.setVisible(true);
+        screen.setResizable(false);
         screen.setSize(900, 630);
         screen.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         screen.addWindowListener(new java.awt.event.WindowAdapter() {
@@ -77,7 +73,7 @@ public class Page {
             }
         });
         HomePage();
-        // OXGamePage();
+         //OXGamePage();
         screen.validate();
 
     }
@@ -179,15 +175,6 @@ public class Page {
                 if (Port == 8882) {
                     if (new String(b.array(), 0, len).startsWith("2")
                             || new String(b.array(), 0, len).startsWith("1")) {
-                        // if(Message.startsWith("Click") && theRound!=0){
-                        // theRound = Integer.parseInt(new String(b.array(), 0, len));
-                        // // System.out.println("Player "+theRound +" turn with Click"); // do
-                        // something
-                        // }else if(Message.startsWith("No") && theRound == 0){
-                        // theRound = Integer.parseInt(new String(b.array(), 0, len));
-                        // System.out.println("Player "+theRound +" turn with No Click"); // do
-                        // something
-                        // }
                         theRound = Integer.parseInt(new String(b.array(), 0, len));
                     }
                 }
@@ -200,7 +187,6 @@ public class Page {
                     }
                 } else if (Port == 2002 && !new String(b.array(), 0, len).startsWith("Server")) {
                     theRound = Integer.parseInt(new String(b.array(), 0, len));
-                    // System.out.println("Current Round = "+theRound);
                 }
             }
             sc.close();
@@ -221,6 +207,7 @@ public class Page {
         System.out.println("player = " + player);
 
         glassPanel.setOpaque(false);
+        glassPanel.setLayout(null);
         glassPanel.add(blockingLabel);
         glassPanel.addMouseListener(new MouseAdapter() {
         });
@@ -234,8 +221,7 @@ public class Page {
             if (!onlineCheck) {
                 screen.setTitle("Waiting For Connection");
                 glassPanel.add(WaitingMsg);
-                WaitingMsg.setFont(new Font("Serif", Font.BOLD, 48));
-                WaitingMsg.setForeground(Color.RED);
+                WaitingMsg.setBounds(520, 500, 318, 76);
                 glassPanel.setVisible(true);
                 blockingLabel.requestFocus();
                 Connection(8883, "");
@@ -256,15 +242,15 @@ public class Page {
     public static void HomePage() {
         // System.out.println("You are Player "+ player);
         jp = new JPanel();
-        JButton StartBtn = new JButton("START");
-        JButton HowToBtn = new JButton("HOW TO");
-        JButton ExitBtn = new JButton("EXIT");
+        JButton HowToBtn = new JButton("EXIT");
         JLabel titLabel = new JLabel("OX Game");
         ImageIcon logoIcon = new ImageIcon("Img\\OXGame.png");
         ImageIcon bgIcon = new ImageIcon("Img\\background.png");
+        ImageIcon StartBtnIcon = new ImageIcon("Img\\Homepagestart-click.png");
+        ImageIcon StartBtnIconClick = new ImageIcon("Img\\Homepagestart.png");
+        JButton StartBtn = new JButton(StartBtnIcon);
         JLabel ImgLabel = new JLabel();
         JLabel ImgLabel2 = new JLabel();
-
 
         // Default Setting
         screen.setTitle("Home Page" + "-Player " + player);
@@ -274,87 +260,74 @@ public class Page {
         jp.setLayout(null); // for position
 
         // Show image
-        logoIcon.setImage(logoIcon.getImage().getScaledInstance(284, 263, Image.SCALE_DEFAULT));
-        ImgLabel.setBounds(280, 100, 284, 263); // Image setting(x,y,width,heigh)
+        ImgLabel.setBounds(150, 50, 487, 470); // Image setting(x,y,width,heigh)
         ImgLabel.setIcon(logoIcon);
         jp.add(ImgLabel);
 
-        bgIcon.setImage(bgIcon.getImage().getScaledInstance(1140, 778, Image.SCALE_DEFAULT));
-        ImgLabel2.setBounds(0, 0, 1440, 778); // Image setting(x,y,width,heigh)
+        bgIcon.setImage(bgIcon.getImage().getScaledInstance(900, 630, Image.SCALE_DEFAULT));
+        ImgLabel2.setBounds(0, 0, 900, 630); // Image setting(x,y,width,heigh)
         ImgLabel2.setIcon(bgIcon);
-        // jp.add(ImgLabel2);
+
+        StartBtnIcon.setImage(StartBtnIcon.getImage().getScaledInstance(224, 65, Image.SCALE_DEFAULT));
 
         // titLabel Setting (Title)
         titLabel.setBounds(350, 100, 300, 50); // Title setting (x,y,width,heigh)
         titLabel.setFont(new java.awt.Font("Dialog", 4, 50)); // Resize Font
         titLabel.setForeground(Color.decode("#FFFFFF"));
-        // jp.add(titLabel);
 
         // Background setting
         jp.setBackground(Color.decode("#888CCCA"));
 
-        // HowTo button change
-        HowToBtn.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // System.out.println("Btn Click");
-                HowToBtn.setContentAreaFilled(false); // Remove Btn Background
-                HowToBtn.setFocusable(false); // inside line invisible
-                HowToBtn.setBorderPainted(false); // outside line invisible
-            }
-        });
         StartBtn.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                // System.out.println("Btn Click");
                 screen.remove(jp); // Clear the screen
                 screen.setTitle("Player Select" + "-Player " + player);
-                // PlayerSelectionPage();
-                OXGamePage();
+                PlayerSelectionPage();
                 screen.validate();
+            }
+        });
+
+        StartBtn.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) {
+                StartBtn.setIcon(StartBtnIconClick);
+            }
+
+            public void mouseExited(MouseEvent e) {
+                StartBtn.setIcon(StartBtnIcon);
+
             }
         });
 
         // button setting
         StartBtn.setFocusable(false); // inside line invisible
         StartBtn.setBorderPainted(false); // outside line invisible
-        HowToBtn.setFocusable(false);
-        HowToBtn.setBorderPainted(false);
-        ExitBtn.setFocusable(false);
-        ExitBtn.setBorderPainted(false);
 
-        StartBtn.setBounds(630, 300, 160, 30); // set position
-        HowToBtn.setBounds(630, 350, 160, 30);
-        ExitBtn.setBounds(630, 400, 160, 30);
-        StartBtn.setBackground(Color.decode("#EEEABA")); // set background color
-        HowToBtn.setBackground(Color.decode("#EEEABA"));
-        ExitBtn.setBackground(Color.decode("#EEEABA"));
-        StartBtn.setForeground(Color.decode("#FF12345")); // set text color
-        HowToBtn.setForeground(Color.decode("#FF12345"));
-        ExitBtn.setForeground(Color.decode("#FF12345"));
+        StartBtn.setBounds(315, 430, 224, 65); // set position
+        StartBtn.setContentAreaFilled(false);
 
         jp.add(StartBtn);
-        jp.add(HowToBtn);
-        jp.add(ExitBtn);
+        jp.add(ImgLabel2);
 
         screen.add(jp);
         screen.validate();
-        // HomePanel.add(Label);
-        // screen.add(HomePanel);
     }
 
     public static JPanel GamePanel = new JPanel(); // Game's Panel
     public static JLabel GridLabel = new JLabel(); // Game's Panel
 
     public static void OXGamePage() {
-        ImageIcon icon;
         int tmpx;
         JLabel player1label = new JLabel();
         JLabel player2label = new JLabel();
 
-        Btn = new ButtonImageCreate[9];
+        if (player == 1) {
+            Connection(8886, "");
+        } else if (player == 2) {
+            Connection(8887, "");
+        }
+
         screen.setVisible(true);
         screen.setSize(900, 630);
         screen.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -368,16 +341,34 @@ public class Page {
         GridLabel.setBounds(250, 50, 500, 500);
         GamePanel.add(GridLabel);
 
-        icon = new ImageIcon("Img/Player1-0.png");
+        icon = new ImageIcon("Img/Player" + player + "-" + role + ".png");
         icon.setImage(icon.getImage().getScaledInstance(170, 230, Image.SCALE_DEFAULT));
         player1label.setIcon(icon);
-        player1label.setBounds(50, 150,170,230);
+        player1label.setBounds(50, 150, 170, 230);
         GamePanel.add(player1label);
-
-        icon = new ImageIcon("Img/Player2-0.png");
+        selfrole = role;
+        // Setting another Player
+        if (player == 1) {
+            anPlayer = 2;
+            Connection(8887, "");
+            anRole = role;
+            while (anRole == 9) {
+                Connection(8887, "");
+                anRole = role;
+            }
+        } else if (player == 2) {
+            anPlayer = 1;
+            Connection(8886, "");
+            anRole = role;
+            while (anRole == 9) {
+                Connection(8886, "");
+                anRole = role;
+            }
+        }
+        icon = new ImageIcon("Img/Player" + Integer.toString(anPlayer) + "-" + Integer.toString(anRole) + ".png");
         icon.setImage(icon.getImage().getScaledInstance(170, 230, Image.SCALE_DEFAULT));
         player2label.setIcon(icon);
-        player2label.setBounds(670, 150,170,230);
+        player2label.setBounds(670, 150, 170, 230);
         GamePanel.add(player2label);
         for (int x = 0; x < 3; x++) {
             Btn[x] = new ButtonImageCreate(x, "", "", 274 + (x * 120), 123, 115, 115);
@@ -400,10 +391,10 @@ public class Page {
             GamePanel.add(Btn[x]);
         }
 
-
         // Decide IsYourTurn
         Thread roundThread = new Thread(new Runnable() {
             int win = 0;
+
             public void run() {
                 // Get start turn
                 theRound = 1;
@@ -414,24 +405,35 @@ public class Page {
                     // NoYourTurn
                     if (theRound != player) {
                         // Block the player windows and Check current turn
-                        BlockPage();
+                        BlockPage(player, selfrole);
                         Connection(2002, ""); // Update current turn
-                        if(win == 1 || win == 2 ){
-                            WinPage(win);   
+                        if (win == 1 || win == 2) {
+                            if (OKBtnCount < 3)
+                                WinPage(win);
+                            else if (OKBtnCount >= 3) {
+                                GamePanel.setVisible(false);
+                                GPanel2.setVisible(false);
+                                screen.remove(GPanel2);
+                                SpaceFlagPage();
+                            }
                             break;
                         }
                     } else if (theRound == player) {
                         // IsYourTurn
-                        if(win == 0){
+                        if (win == 0) {
                             GPanel2.setVisible(false);
                             screen.remove(GPanel2); // Remove GlassPanel(GPanel2)
                             if (player == 2)
                                 System.out.println("is my turn");
-                        }else if(win == 1 || win == 2 ){
-                            WinPage(win);   
+                        } else if (win == 1 || win == 2) {
+                            if (OKBtnCount < 3)
+                                WinPage(win);
+                            else if (OKBtnCount >= 3) {
+                                SpaceFlagPage();
+                            }
                             break;
                         }
-                        
+
                         // continue;
                     }
                     // Display O or X of each grid
@@ -439,17 +441,17 @@ public class Page {
                         // Get the O or X with specific number
                         Connection(2000, Integer.toString(i));
 
-                        if (gridChecked == 10) {            // 10 show that this grid drawn from player 1
+                        if (gridChecked == 10) { // 10 show that this grid drawn from player 1
                             Btn[i].setText("O");
                             Btn[i].setFont(new Font("Arial", Font.PLAIN, 72));
                             Btn[i].setForeground(Color.RED);
-                        } else if (gridChecked == 20) {     // 20 show that this grid drawn from player 2
+                        } else if (gridChecked == 20) { // 20 show that this grid drawn from player 2
                             Btn[i].setText("X");
                             Btn[i].setFont(new Font("Arial", Font.PLAIN, 72));
                             Btn[i].setForeground(Color.BLUE);
                         }
 
-                        gridChecked = 0;            // reset gridChecked
+                        gridChecked = 0; // reset gridChecked
                     }
                 }
             }
@@ -460,82 +462,98 @@ public class Page {
         screen.validate();
     }
 
-    // This is use for OXGame Page to determine win status in each round , return 1 , 2 , 0 or 3
+    // This is use for OXGame Page to determine win status in each round , return 1
+    // , 2 , 0 or 3
     // 1 represents winner is player1 , 2 represents winner is player 2
     // 0 represents no winner in this round
     // 3 represents this is peace round (all btn are clicked)
-    public static int CheckWin(){
+    public static int CheckWin() {
         int unclicked = 0;
-        if(Btn[0].getText().compareTo("O") == 0 && Btn[1].getText().compareTo("O") == 0 && Btn[2].getText().compareTo("O") == 0){
+        if (Btn[0].getText().compareTo("O") == 0 && Btn[1].getText().compareTo("O") == 0
+                && Btn[2].getText().compareTo("O") == 0) {
             return 1;
-        }else if(Btn[0].getText().compareTo("X") == 0 && Btn[1].getText().compareTo("X") == 0 && Btn[2].getText().compareTo("X") == 0){
+        } else if (Btn[0].getText().compareTo("X") == 0 && Btn[1].getText().compareTo("X") == 0
+                && Btn[2].getText().compareTo("X") == 0) {
             return 2;
         }
 
-        if(Btn[3].getText().compareTo("O") == 0 && Btn[4].getText().compareTo("O") == 0 && Btn[5].getText().compareTo("O") == 0){
+        if (Btn[3].getText().compareTo("O") == 0 && Btn[4].getText().compareTo("O") == 0
+                && Btn[5].getText().compareTo("O") == 0) {
             return 1;
-        }else if(Btn[3].getText().compareTo("X") == 0 && Btn[4].getText().compareTo("X") == 0 && Btn[5].getText().compareTo("X") == 0){
+        } else if (Btn[3].getText().compareTo("X") == 0 && Btn[4].getText().compareTo("X") == 0
+                && Btn[5].getText().compareTo("X") == 0) {
             return 2;
         }
 
-        if(Btn[6].getText().compareTo("O") == 0 && Btn[7].getText().compareTo("O") == 0 && Btn[8].getText().compareTo("O") == 0){
+        if (Btn[6].getText().compareTo("O") == 0 && Btn[7].getText().compareTo("O") == 0
+                && Btn[8].getText().compareTo("O") == 0) {
             return 1;
-        }else if(Btn[6].getText().compareTo("X") == 0 && Btn[7].getText().compareTo("X") == 0 && Btn[8].getText().compareTo("X") == 0){
+        } else if (Btn[6].getText().compareTo("X") == 0 && Btn[7].getText().compareTo("X") == 0
+                && Btn[8].getText().compareTo("X") == 0) {
             return 2;
         }
 
-        if(Btn[0].getText().compareTo("O") == 0 && Btn[4].getText().compareTo("O") == 0 && Btn[8].getText().compareTo("O") == 0){
+        if (Btn[0].getText().compareTo("O") == 0 && Btn[4].getText().compareTo("O") == 0
+                && Btn[8].getText().compareTo("O") == 0) {
             return 1;
-        }else if(Btn[0].getText().compareTo("X") == 0 && Btn[4].getText().compareTo("X") == 0 && Btn[8].getText().compareTo("X") == 0){
+        } else if (Btn[0].getText().compareTo("X") == 0 && Btn[4].getText().compareTo("X") == 0
+                && Btn[8].getText().compareTo("X") == 0) {
             return 2;
         }
 
-        if(Btn[2].getText().compareTo("O") == 0 && Btn[4].getText().compareTo("O") == 0 && Btn[6].getText().compareTo("O") == 0){
+        if (Btn[2].getText().compareTo("O") == 0 && Btn[4].getText().compareTo("O") == 0
+                && Btn[6].getText().compareTo("O") == 0) {
             return 1;
-        }else if(Btn[2].getText().compareTo("X") == 0 && Btn[4].getText().compareTo("X") == 0 && Btn[6].getText().compareTo("X") == 0){
+        } else if (Btn[2].getText().compareTo("X") == 0 && Btn[4].getText().compareTo("X") == 0
+                && Btn[6].getText().compareTo("X") == 0) {
             return 2;
         }
 
-        if(Btn[0].getText().compareTo("O") == 0 && Btn[3].getText().compareTo("O") == 0 && Btn[6].getText().compareTo("O") == 0){
+        if (Btn[0].getText().compareTo("O") == 0 && Btn[3].getText().compareTo("O") == 0
+                && Btn[6].getText().compareTo("O") == 0) {
             return 1;
-        }else if(Btn[0].getText().compareTo("X") == 0 && Btn[3].getText().compareTo("X") == 0 && Btn[6].getText().compareTo("X") == 0){
+        } else if (Btn[0].getText().compareTo("X") == 0 && Btn[3].getText().compareTo("X") == 0
+                && Btn[6].getText().compareTo("X") == 0) {
             return 2;
         }
 
-        if(Btn[1].getText().compareTo("O") == 0 && Btn[4].getText().compareTo("O") == 0 && Btn[7].getText().compareTo("O") == 0){
+        if (Btn[1].getText().compareTo("O") == 0 && Btn[4].getText().compareTo("O") == 0
+                && Btn[7].getText().compareTo("O") == 0) {
             return 1;
-        }else if(Btn[1].getText().compareTo("X") == 0 && Btn[4].getText().compareTo("X") == 0 && Btn[7].getText().compareTo("X") == 0){
+        } else if (Btn[1].getText().compareTo("X") == 0 && Btn[4].getText().compareTo("X") == 0
+                && Btn[7].getText().compareTo("X") == 0) {
             return 2;
         }
 
-        if(Btn[2].getText().compareTo("O") == 0 && Btn[5].getText().compareTo("O") == 0 && Btn[8].getText().compareTo("O") == 0){
+        if (Btn[2].getText().compareTo("O") == 0 && Btn[5].getText().compareTo("O") == 0
+                && Btn[8].getText().compareTo("O") == 0) {
             return 1;
-        }else if(Btn[2].getText().compareTo("X") == 0 && Btn[5].getText().compareTo("X") == 0 && Btn[8].getText().compareTo("X") == 0){
+        } else if (Btn[2].getText().compareTo("X") == 0 && Btn[5].getText().compareTo("X") == 0
+                && Btn[8].getText().compareTo("X") == 0) {
             return 2;
         }
 
-        for(int i = 0 ; i < 9 ; i++){
-            if(Btn[i].getText().compareTo("") == 0){
-                unclicked ++;
+        for (int i = 0; i < 9; i++) {
+            if (Btn[i].getText().compareTo("") == 0) {
+                unclicked++;
             }
         }
 
-        if(unclicked == 0){
+        if (unclicked == 0) {
             return 3;
         }
 
         return 0;
     }
-    public static void BlockPage() {
+
+    public static void BlockPage(int p, int r) {
+        GPanel2.add(TurnMsg);
         GPanel2.setOpaque(false);
         GPanel2.add(blockingLabel);
         TurnMsg.setFont(new Font("Serif", Font.BOLD, 48));
         TurnMsg.setForeground(Color.RED);
-        GPanel2.add(TurnMsg);
-        GPanel2.addKeyListener(new KeyAdapter() {
-        });
-        GPanel2.addMouseListener(new MouseAdapter() {
-        });
+        GPanel2.addKeyListener(new KeyAdapter() {});
+        GPanel2.addMouseListener(new MouseAdapter() {});
         screen.setGlassPane(GPanel2);
         blockingLabel.requestFocus();
         GPanel2.setVisible(true);
@@ -543,9 +561,15 @@ public class Page {
     }
 
     public static void PlayerSelectionPage() {
+        ImageIcon bgIcon = new ImageIcon("Img\\background_playerselectionpage.png");
+        JLabel ImgLabel2 = new JLabel();
+
         PlayerPanel.setVisible(true);
         screen.setTitle("PlayerSelectionPage" + "-Player " + player);
-        PlayerPanel.setBackground(Color.decode("#000339"));
+        bgIcon.setImage(bgIcon.getImage().getScaledInstance(900, 630, Image.SCALE_DEFAULT));
+        ImgLabel2.setBounds(0, 0, 900, 630); // Image setting(x,y,width,heigh)
+        ImgLabel2.setIcon(bgIcon);
+
         PlayerPanel.setLayout(null);
         Button = new ButtonImageCreate[6];
         for (int x = 0; x < Button.length; x++) {
@@ -557,7 +581,7 @@ public class Page {
         }
 
         // OK Button
-        Button[4] = new ButtonImageCreate(13, "Img/OKBTN-UnSelected.png", "Img/OKBTN.png", 355, 450, 154, 65);
+        Button[4] = new ButtonImageCreate(13, "Img/OKBTN-UnSelected.png", "Img/OKBTN.png", 330, 450, 224, 65);
         Button[4].addActionListener(BH);
         Button[4].addMouseListener(MH);
         PlayerPanel.add(Button[4]);
@@ -567,6 +591,8 @@ public class Page {
         Button[5].addActionListener(BH);
         Button[5].addMouseListener(MH);
         PlayerPanel.add(Button[5]);
+
+        PlayerPanel.add(ImgLabel2);
         screen.add(PlayerPanel);
 
     }
@@ -575,18 +601,17 @@ public class Page {
         ImageIcon flagIcon, flagIcon2, character, character2, srver; // srver : Client VS Server(PC)
         Image image;
         JLabel flagLabel, flagLabel2, srverLabel;
-
         SpacePanel.setVisible(true);
         screen.setTitle("SpaceFlagPage" + "-Player " + player);
         SpacePanel.setLayout(null);
 
         // Detect Key Press
         addKeyBind(SpacePanel, "SPACE");
-        if (player == 1) {
-            Connection(8886, "");
-        } else if (player == 2) {
-            Connection(8887, "");
-        }
+        // if (player == 1) {
+        // Connection(8886, "");
+        // } else if (player == 2) {
+        // Connection(8887, "");
+        // }
 
         flagIcon = new ImageIcon("Img/Flag.png");
         image = flagIcon.getImage();
@@ -594,29 +619,29 @@ public class Page {
         flagIcon = new ImageIcon(image);
         flagIcon2 = flagIcon;
 
-        character = new ImageIcon("Img/Player" + player + "-" + role + ".png");
+        character = new ImageIcon("Img/Player" + player + "-" + selfrole + ".png");
         image = character.getImage();
         image = image.getScaledInstance(50, 70, java.awt.Image.SCALE_SMOOTH);
         character = new ImageIcon(image);
 
         // Setting another Player
-        if (player == 1) {
-            anPlayer = 2;
-            Connection(8887, "");
-            anRole = role;
-            while (anRole == 9) {
-                Connection(8887, "");
-                anRole = role;
-            }
-        } else if (player == 2) {
-            anPlayer = 1;
-            Connection(8886, "");
-            anRole = role;
-            while (anRole == 9) {
-                Connection(8886, "");
-                anRole = role;
-            }
-        }
+        // if (player == 1) {
+        // anPlayer = 2;
+        // Connection(8887, "");
+        // anRole = role;
+        // while (anRole == 9) {
+        // Connection(8887, "");
+        // anRole = role;
+        // }
+        // } else if (player == 2) {
+        // anPlayer = 1;
+        // Connection(8886, "");
+        // anRole = role;
+        // while (anRole == 9) {
+        // Connection(8886, "");
+        // anRole = role;
+        // }
+        // }
 
         character2 = new ImageIcon("Img/Player" + Integer.toString(anPlayer) + "-" + Integer.toString(anRole) + ".png");
         image = character2.getImage();
@@ -663,8 +688,6 @@ public class Page {
 
                 if (P2y != 0) {
                     WinPage(1);
-
-                    // JOptionPane.showMessageDialog(SpacePanel,"Player 1 win");
                 }
                 System.out.println("End of Thread");
 
@@ -721,6 +744,7 @@ public class Page {
         SpacePanel.add(characterLabel2P2);
         SpacePanel.add(srverLabel);
         screen.add(SpacePanel);
+        screen.validate();
 
     }
 
@@ -738,7 +762,8 @@ public class Page {
         panel.setBounds(240, 100, 456, 343);
         GPanel.add(blockingLabel);
 
-        playAgainBtn = new ButtonImageCreate(30, "Img/playAgainBtn.png", "Img/playAgainBtn-click.png", 310, 290, 154,65);
+        playAgainBtn = new ButtonImageCreate(30, "Img/playAgainBtn.png", "Img/playAgainBtn-click.png", 310, 290, 154,
+                65);
         playAgainBtn.addActionListener(BH);
         playAgainBtn.addMouseListener(MH);
 
@@ -751,10 +776,8 @@ public class Page {
         GPanel.add(playAgainBtn);
         GPanel.add(exitBtn);
         GPanel.add(panel);
-        GPanel.addKeyListener(new KeyAdapter() {
-        });
-        GPanel.addMouseListener(new MouseAdapter() {
-        });
+        GPanel.addKeyListener(new KeyAdapter() {});
+        GPanel.addMouseListener(new MouseAdapter() {});
         screen.setGlassPane(GPanel);
         blockingLabel.requestFocus();
         GPanel.setVisible(true);
@@ -799,112 +822,71 @@ public class Page {
 
     private static class ButtonHandler implements ActionListener {
         private Integer LastClick = -1;
-        int win = 100;
+        countThread ct = new countThread();
+
         @Override
         public void actionPerformed(ActionEvent e) {
             ButtonImageCreate myBtn = (ButtonImageCreate) e.getSource();
             ButtonImageCreate tmpBtn = myBtn;
             // ?
-            if (ExistsLastClick() >= 0 && ExistsLastClick() != 4) {
+            if (ExistsLastClick() >= 0 && ExistsLastClick() != 4 && ExistsLastClick() != 13) {
                 Character = ExistsLastClick();
                 System.out.println("LastClick " + ExistsLastClick());
-                tmpBtn = Btn[ExistsLastClick()]; // Control LastClick Button
-                tmpBtn.setIcon(tmpBtn.icon);
-                tmpBtn.setClick(0); // Formate the setting of Button Click
+                if (Character >= 10 && Character <= 12) {
+                    Character = Character - 10;
+                    tmpBtn = Button[ExistsLastClick() - 10];
+                    tmpBtn.setIcon(tmpBtn.icon);
+                    tmpBtn.setClick(0);
+                } else if (Character >= 0 && Character <= 8) {
+                    tmpBtn = Btn[ExistsLastClick()]; // Control LastClick Button
+                    tmpBtn.setIcon(tmpBtn.icon);
+                    tmpBtn.setClick(0); // Formate the setting of Button Click
+                }
 
             }
 
-            // Connection(8882,"");
-            // System.out.println("Player "+theRound+" Round");
-
-            // if(theRound == player){
-            // if(myBtn.getID() <= 8 && myBtn.getID() >= 0){
-            // // Determind the grid is available to Click
-            // // Connection(2000,Integer.toString(myBtn.getID()));
-            // if(myBtn.IsClicked() != 1 && player == 1){
-            // myBtn.setText("O");
-            // myBtn.setFont(new Font("Arial", Font.PLAIN, 72));
-            // myBtn.setForeground(Color.RED);
-            // // Set grid is clicked
-            // // Connection(2001,Integer.toString(myBtn.getID()+10));
-            // // Connection(8882,"Click");
-            // }else if(myBtn.IsClicked() != 1 && player == 2){
-            // myBtn.setText("X");
-            // myBtn.setFont(new Font("Arial", Font.PLAIN, 72));
-            // myBtn.setForeground(Color.BLUE);
-            // // Connection(2001,Integer.toString(myBtn.getID()+20));
-            // // Connection(8882,"Click");
-            // }
-            // }
-            // // Connection(8882,"Click"); // Round
-            // }
-            // else if(theRound == 2 && player == 2){
-            // if(myBtn.getID() <= 8 && myBtn.getID() >= 0){
-            // Connection(2000,Integer.toString(myBtn.getID()));
-            // if(myBtn.IsClicked() != 1 && gridChecked == 0){
-            // myBtn.setText("X");
-            // myBtn.setFont(new Font("Arial", Font.PLAIN, 72));
-            // myBtn.setForeground(Color.BLUE);
-            // Connection(2001,Integer.toString(myBtn.getID()+20));
-            // }
-            // }
-            // Connection(8882,"");
-            // }
-            
-            if(theRound == 1 && player == 1  ){
-                if(myBtn.getID() <= 8 && myBtn.getID() >= 0){
+            if (theRound == 1 && player == 1) {
+                if (myBtn.getID() <= 8 && myBtn.getID() >= 0) {
                     // Determind the grid is available to Click
                     // Connection(2000,Integer.toString(myBtn.getID()));
-                    if(myBtn.IsClicked() != 1 && gridChecked == 0){
+                    if (myBtn.IsClicked() != 1 && gridChecked == 0) {
                         myBtn.setText("O");
                         myBtn.setFont(new Font("Arial", Font.PLAIN, 72));
                         myBtn.setForeground(Color.RED);
-                        Connection(2001,Integer.toString(myBtn.getID()+10));
+                        Connection(2001, Integer.toString(myBtn.getID() + 10));
                     }
                 }
-                Connection(8882,"");
-                // win = CheckWin();
-                // if(win == 1 || win == 2 ){
-                //     WinPage(win);   
-                // }
-            }else if(theRound == 2 && player == 2){
-                if(myBtn.getID() <= 8 && myBtn.getID() >= 0){
+                Connection(8882, "");
+            } else if (theRound == 2 && player == 2) {
+                if (myBtn.getID() <= 8 && myBtn.getID() >= 0) {
                     // Connection(2000,Integer.toString(myBtn.getID()));
-                    if(myBtn.IsClicked() != 1 && gridChecked == 0){
+                    if (myBtn.IsClicked() != 1 && gridChecked == 0) {
                         myBtn.setText("X");
                         myBtn.setFont(new Font("Arial", Font.PLAIN, 72));
                         myBtn.setForeground(Color.BLUE);
-                        Connection(2001,Integer.toString(myBtn.getID()+20));
+                        Connection(2001, Integer.toString(myBtn.getID() + 20));
 
                     }
                 }
-                Connection(8882,"");
-                // win = CheckWin();
-                // if(win == 1 || win == 2 ){
-                //     WinPage(win);   
-                // }
+                Connection(8882, "");
             }
 
-            
             // Switch to HomePage
             if (myBtn.getID() == 14) {
                 PlayerPanel.setVisible(false);
                 HomePage();
             } else if (myBtn.getID() == 13) { // OKBtn
-                PlayerPanel.setVisible(false);
-                if (player == 1) {
-                    System.out.println("Character : " + Integer.toString(Character));
-                    Connection(8884, Integer.toString(Character));
-                } else if (player == 2) {
-                    Connection(8885, Integer.toString(Character));
+                try {
+                    ct.start();
+                } catch (Exception E) {
+                    System.out.println("Thread started already");
                 }
-                
-                SpaceFlagPage();
-            } else if (myBtn.getID() == 30){   // PlayAgainBtn
+                OKBtnCount++;
+            } else if (myBtn.getID() == 30) { // PlayAgainBtn
                 GPanel.setVisible(false);
                 SpacePanel.setVisible(false);
                 HomePage();
-            }else if (myBtn.getID() == 31){   // ExitBtn
+            } else if (myBtn.getID() == 31) { // ExitBtn
                 GPanel.setVisible(false);
                 SpacePanel.setVisible(false);
                 screen.dispose();
@@ -972,11 +954,11 @@ class ButtonImageCreate extends JButton {
         this.iconHover = new ImageIcon(imageHover);
         this.ID = ID;
         this.setIcon(icon);
-        if(this.ID >= 0 && this.ID <= 8){
+        if (this.ID >= 0 && this.ID <= 8) {
             this.setContentAreaFilled(true); // Remove Btn Background
             this.setFocusable(true);
-            this.setBorderPainted(true); // Remove Btn Border                  
-        }else{
+            this.setBorderPainted(true); // Remove Btn Border
+        } else {
             this.setContentAreaFilled(false); // Remove Btn Background
             this.setFocusable(false);
             this.setBorderPainted(false); // Remove Btn Border
@@ -997,4 +979,27 @@ class ButtonImageCreate extends JButton {
         return Clicked;
     }
 
+}
+
+class countThread extends Thread {
+    public void run() {
+        try {
+            Thread.sleep(1500);
+            System.out.println("Clicked : " + Page.OKBtnCount);
+            Page.PlayerPanel.setVisible(false);
+            if (Page.player == 1) {
+                System.out.println("Character : " + Integer.toString(Page.Character));
+                Page.Connection(8884, Integer.toString(Page.Character));
+            } else if (Page.player == 2) {
+                Page.Connection(8885, Integer.toString(Page.Character));
+            }
+            // SpaceFlagPage();
+            Page.OXGamePage();
+            if (Page.OKBtnCount >= 3) {
+                // Mode On
+                System.out.println("mode on");
+            }
+        } catch (Exception e) {
+        }
+    }
 }
