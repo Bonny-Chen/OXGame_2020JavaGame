@@ -27,6 +27,9 @@ public class MultiPortServer
 	public static int[] virtualGrid = new int [9];		// Recording Player Turn
 	public static int checkGrid = 10;					// Receive the Grid clicked By Client and Check Whether the grid is avaliable to click
 	public static int setGrid = 100;
+	public static int isclicked = 0;
+	public static int new_winner = 0;
+
 	public static void main(String args[]) throws Exception 
 	{
 		Selector 	selector = Selector.open();   	// Create a selector
@@ -59,7 +62,7 @@ public class MultiPortServer
 			if(i==8896)port=4041;
 			if(i==8897)port=4042;
 			
-			ss.bind(new InetSocketAddress(InetAddress.getByName("192.168.0.2"), port));
+			ss.bind(new InetSocketAddress(InetAddress.getByName("127.0.0.1"), port));
 			SelectionKey key = ssc.register(selector, SelectionKey.OP_ACCEPT);   
 			System.out.println("Listening on " + port + " port...");
 		}
@@ -92,19 +95,19 @@ public class MultiPortServer
 						// Register the new connection with the selector
 						// and listen on the SOCKET-READ event
 						SelectionKey newKey = sc.register(selector, SelectionKey.OP_READ);
-						if(sc.getLocalAddress().toString().equals("/192.168.0.2:8880") && in8880 == 0){
+						if(sc.getLocalAddress().toString().equals("/127.0.0.1:8880") && in8880 == 0){
 							System.out.println("Client in port 8880");
 							inPort = 8880;
 							in8880 = 1;
-						}else if(sc.getLocalAddress().toString().equals("/192.168.0.2:8881") && in8881 == 0){
+						}else if(sc.getLocalAddress().toString().equals("/127.0.0.1:8881") && in8881 == 0){
 							System.out.println("Client in port 8881");
 							inPort = 8881;
 							in8881 = 1;
-						}else if(sc.getLocalAddress().toString().equals("/192.168.0.2:8882")){
+						}else if(sc.getLocalAddress().toString().equals("/127.0.0.1:8882")){
 							// Decide the round 
 							System.out.println("Client in port 8882");
 							inPort = 8882;
-						}else if(sc.getLocalAddress().toString().equals("/192.168.0.2:8883")){
+						}else if(sc.getLocalAddress().toString().equals("/127.0.0.1:8883")){
 							System.out.println("Client in port 8883");
 							inPort = 8883;
 							if(in8880 == 1 && in8881 == 1){
@@ -112,39 +115,39 @@ public class MultiPortServer
 							}else{
 								inDetect = false;
 							}
-						}else if(sc.getLocalAddress().toString().equals("/192.168.0.2:8884")){
+						}else if(sc.getLocalAddress().toString().equals("/127.0.0.1:8884")){
 							System.out.println("Client in port 8884");
 							inPort = 8884;
-						}else if(sc.getLocalAddress().toString().equals("/192.168.0.2:8885")){
+						}else if(sc.getLocalAddress().toString().equals("/127.0.0.1:8885")){
 							System.out.println("Client in port 8885");
 							inPort = 8885;
-						}else if(sc.getLocalAddress().toString().equals("/192.168.0.2:8886")){
+						}else if(sc.getLocalAddress().toString().equals("/127.0.0.1:8886")){
 							System.out.println("Client in port 8886");
 							inPort = 8886;
-						}else if(sc.getLocalAddress().toString().equals("/192.168.0.2:8887")){
+						}else if(sc.getLocalAddress().toString().equals("/127.0.0.1:8887")){
 							System.out.println("Client in port 8887");
 							inPort = 8887;
-						}else if(sc.getLocalAddress().toString().equals("/192.168.0.2:8888")){
-							// Recieve Player1's Role Position in SpaceFlagPage
+						}else if(sc.getLocalAddress().toString().equals("/127.0.0.1:8888")){
+							// Reset Grid[i] to 0
 							System.out.println("Client in port 8888");
 							inPort = 8888;
-						}else if(sc.getLocalAddress().toString().equals("/192.168.0.2:8889")){
-							// Recieve Player2's Role Position in SpaceFlagPage
+						}else if(sc.getLocalAddress().toString().equals("/127.0.0.1:8889")){
+							// Send and receive isclicked value
 							System.out.println("Client in port 8889");
 							inPort = 8889;
-						}else if(sc.getLocalAddress().toString().equals("/192.168.0.2:8890")){
-							// Send Player1's Role Position in SpaceFlagPage
+						}else if(sc.getLocalAddress().toString().equals("/127.0.0.1:8890")){
+							// Set winner in RedoGrid()
 							System.out.println("Client in port 8890");
 							inPort = 8890;
-						}else if(sc.getLocalAddress().toString().equals("/192.168.0.2:8891")){
-							// Send Player2's Role Position in SpaceFlagPage
+						}else if(sc.getLocalAddress().toString().equals("/127.0.0.1:8891")){
+							// Send winner in RedoGrid()
 							System.out.println("Client in port 8891");
 							inPort = 8891;
-						}else if(sc.getLocalAddress().toString().equals("/192.168.0.2:8892")){
+						}else if(sc.getLocalAddress().toString().equals("/127.0.0.1:8892")){
 							// Send winner in SpaceFlagPage
 							System.out.println("Client in port 8892");
 							inPort = 8892;
-						}else if(sc.getLocalAddress().toString().equals("/192.168.0.2:4041")){
+						}else if(sc.getLocalAddress().toString().equals("/127.0.0.1:4041")){
 							// Detect player1 offline
 							System.out.println("Play1 offline");
 							inPort = 4041;
@@ -154,11 +157,15 @@ public class MultiPortServer
 							role[1] = 9;
 							pos[1] = 500;
 							pos[0] = 0;
+							isclicked = 0;
+							new_winner = 0;
+							setGrid = 100;
+							checkGrid = 10;
 							for(int i = 0 ; i < 9 ; i++){
 								grid[i] = 0;
 							}
 							inDetect = false;
-						}else if(sc.getLocalAddress().toString().equals("/192.168.0.2:4042")){
+						}else if(sc.getLocalAddress().toString().equals("/127.0.0.1:4042")){
 							// Send winner in SpaceFlagPage
 							System.out.println("Play2 offline");
 							inPort = 4042;
@@ -168,19 +175,23 @@ public class MultiPortServer
 							role[2] = 9;
 							pos[2] = 500;
 							pos[0] = 0;
+							isclicked = 0;
+							new_winner = 0;
+							setGrid = 100;
+							checkGrid = 10;
 							for(int i = 0 ; i < 9 ; i++){
 								grid[i] = 0;
 							}
 							inDetect = false;
-						}else if(sc.getLocalAddress().toString().equals("/192.168.0.2:2000")){
+						}else if(sc.getLocalAddress().toString().equals("/127.0.0.1:2000")){
 							// Send grid status "who clicked this grid" to Client
 							System.out.println("Client in port 2000");
 							inPort = 2000;
-						}else if(sc.getLocalAddress().toString().equals("/192.168.0.2:2001")){
+						}else if(sc.getLocalAddress().toString().equals("/127.0.0.1:2001")){
 							// Client set grid (who click the grid)
 							System.out.println("Client in port 2001");
 							inPort = 2001;
-						}else if(sc.getLocalAddress().toString().equals("/192.168.0.2:2002")){
+						}else if(sc.getLocalAddress().toString().equals("/127.0.0.1:2002")){
 							// Send Current Turn to Client
 							System.out.println("Client in port 2002");
 							inPort = 2002;
@@ -235,18 +246,26 @@ public class MultiPortServer
 									}
 								}
 								
-								if(inPort == 8888 && !new String(b.array(), 0, len).startsWith("Client")){
-									pos[1] = Integer.parseInt(new String(b.array(), 0, len));
-									if(pos[1] == 0 && pos[0] == 0){
-										pos[0] = 1;
-									}
-								}else if(inPort == 8889 && !new String(b.array(), 0, len).startsWith("Client")){
-									pos[2] = Integer.parseInt(new String(b.array(), 0, len));
-									if(pos[2] == 0 && pos[0] == 0){
-										pos[0] = 2;
-									}
+								if(inPort == 8888){
+									if (new String(b.array(), 0, len).startsWith("0") 
+										|| new String(b.array(), 0, len).startsWith("1")
+										|| new String(b.array(), 0, len).startsWith("2")
+										|| new String(b.array(), 0, len).startsWith("3")
+										|| new String(b.array(), 0, len).startsWith("4")
+										|| new String(b.array(), 0, len).startsWith("5")
+										|| new String(b.array(), 0, len).startsWith("6")
+										|| new String(b.array(), 0, len).startsWith("7")
+										|| new String(b.array(), 0, len).startsWith("8")){
+											grid[Integer.parseInt(new String(b.array(), 0, len))] = 0;
+										}
+								}else if(inPort == 8889){
+									if(new String(b.array(), 0, len).startsWith("0") || new String(b.array(), 0, len).startsWith("1"))
+										isclicked = Integer.parseInt(new String(b.array(), 0, len));
+								}else if(inPort == 8890 ){
+									if (new String(b.array(), 0, len).startsWith("1") || new String(b.array(), 0, len).startsWith("2") || new String(b.array(), 0, len).startsWith("3")){
+											new_winner = Integer.parseInt(new String(b.array(), 0, len));
+										}
 								}
-
 								if(inPort == 2000){
 									if (new String(b.array(), 0, len).startsWith("0") 
 										|| new String(b.array(), 0, len).startsWith("1")
@@ -259,7 +278,7 @@ public class MultiPortServer
 										|| new String(b.array(), 0, len).startsWith("8")){
 											checkGrid = Integer.parseInt(new String(b.array(), 0, len));
 										}
-								}else if(inPort == 2001 && !new String(b.array(), 0, len).startsWith("Client")){
+								}else if(inPort == 2001 && !new String(b.array(), 0, len).startsWith("Client") && !new String(b.array(), 0, len).startsWith("Get")){
 									setGrid = Integer.parseInt(new String(b.array(), 0, len));
 									if(setGrid - 10 >= 0 && setGrid - 10 <= 8){
 										grid[setGrid-10] = 10;
@@ -281,6 +300,9 @@ public class MultiPortServer
 								}else if(inPort == 8881){
 									data = "2";				// Player 2
 								}
+								if (inPort == 8889){
+									data = Integer.toString(isclicked);
+								}
 								if(inPort == 8886){
 									data = Integer.toString(role[1]);			// Get Player'1 role
 								}
@@ -290,10 +312,10 @@ public class MultiPortServer
 								if(inPort == 8882){
 									data = Integer.toString(round);
 								}
-								if(inPort == 8890){
-									data = Integer.toString(pos[1]);
-								}else if(inPort == 8891){
-									data = Integer.toString(pos[2]);
+								if(inPort == 8891){
+									if( new String(b.array(), 0, len).startsWith("Get") ){
+										data = Integer.toString(new_winner);
+									}
 								}
 								if(inPort == 8892){
 									data = Integer.toString(pos[0]);
