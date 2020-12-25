@@ -18,6 +18,7 @@ public class MultiPortServer
 	public static int[] virtualGrid = new int [9];		// Recording Player Turn
 	public static int checkGrid = 10;					// Receive the Grid clicked By Client and Check Whether the grid is avaliable to click
 	public static int setGrid = 100;
+	public static int loop = 0;
 	public static void main(String args[]) throws Exception 
 	{
 		Selector 	selector = Selector.open();   	// Create a selector
@@ -50,7 +51,7 @@ public class MultiPortServer
 			if(i==8896)port=4041;
 			if(i==8897)port=4042;
 			
-			ss.bind(new InetSocketAddress(InetAddress.getByName("192.168.0.2"), port));
+			ss.bind(new InetSocketAddress(InetAddress.getByName("10.22.24.156"), port));
 			SelectionKey key = ssc.register(selector, SelectionKey.OP_ACCEPT);   
 			System.out.println("Listening on " + port + " port...");
 		}
@@ -58,6 +59,7 @@ public class MultiPortServer
 		// The main loop waiting for events
 		while(true)
 		{
+			if(loop==1)break;
 		    // The following method blocks until 
 		    // at least one of the registered events occurs.
 			int num = selector.select();
@@ -83,19 +85,19 @@ public class MultiPortServer
 						// Register the new connection with the selector
 						// and listen on the SOCKET-READ event
 						SelectionKey newKey = sc.register(selector, SelectionKey.OP_READ);
-						if(sc.getLocalAddress().toString().equals("/192.168.0.2:8880") && in8880 == 0){
+						if(sc.getLocalAddress().toString().equals("/10.22.24.156:8880") && in8880 == 0){
 							System.out.println("Client in port 8880");
 							inPort = 8880;
 							in8880 = 1;
-						}else if(sc.getLocalAddress().toString().equals("/192.168.0.2:8881") && in8881 == 0){
+						}else if(sc.getLocalAddress().toString().equals("/10.22.24.156:8881") && in8881 == 0){
 							System.out.println("Client in port 8881");
 							inPort = 8881;
 							in8881 = 1;
-						}else if(sc.getLocalAddress().toString().equals("/192.168.0.2:8882")){
+						}else if(sc.getLocalAddress().toString().equals("/10.22.24.156:8882")){
 							// Decide the round 
 							System.out.println("Client in port 8882");
 							inPort = 8882;
-						}else if(sc.getLocalAddress().toString().equals("/192.168.0.2:8883")){
+						}else if(sc.getLocalAddress().toString().equals("/10.22.24.156:8883")){
 							System.out.println("Client in port 8883");
 							inPort = 8883;
 							if(in8880 == 1 && in8881 == 1){
@@ -103,39 +105,39 @@ public class MultiPortServer
 							}else{
 								inDetect = false;
 							}
-						}else if(sc.getLocalAddress().toString().equals("/192.168.0.2:8884")){
+						}else if(sc.getLocalAddress().toString().equals("/10.22.24.156:8884")){
 							System.out.println("Client in port 8884");
 							inPort = 8884;
-						}else if(sc.getLocalAddress().toString().equals("/192.168.0.2:8885")){
+						}else if(sc.getLocalAddress().toString().equals("/10.22.24.156:8885")){
 							System.out.println("Client in port 8885");
 							inPort = 8885;
-						}else if(sc.getLocalAddress().toString().equals("/192.168.0.2:8886")){
+						}else if(sc.getLocalAddress().toString().equals("/10.22.24.156:8886")){
 							System.out.println("Client in port 8886");
 							inPort = 8886;
-						}else if(sc.getLocalAddress().toString().equals("/192.168.0.2:8887")){
+						}else if(sc.getLocalAddress().toString().equals("/10.22.24.156:8887")){
 							System.out.println("Client in port 8887");
 							inPort = 8887;
-						}else if(sc.getLocalAddress().toString().equals("/192.168.0.2:8888")){
+						}else if(sc.getLocalAddress().toString().equals("/10.22.24.156:8888")){
 							// Recieve Player1's Role Position in SpaceFlagPage
 							System.out.println("Client in port 8888");
 							inPort = 8888;
-						}else if(sc.getLocalAddress().toString().equals("/192.168.0.2:8889")){
+						}else if(sc.getLocalAddress().toString().equals("/10.22.24.156:8889")){
 							// Recieve Player2's Role Position in SpaceFlagPage
 							System.out.println("Client in port 8889");
 							inPort = 8889;
-						}else if(sc.getLocalAddress().toString().equals("/192.168.0.2:8890")){
+						}else if(sc.getLocalAddress().toString().equals("/10.22.24.156:8890")){
 							// Send Player1's Role Position in SpaceFlagPage
 							System.out.println("Client in port 8890");
 							inPort = 8890;
-						}else if(sc.getLocalAddress().toString().equals("/192.168.0.2:8891")){
+						}else if(sc.getLocalAddress().toString().equals("/10.22.24.156:8891")){
 							// Send Player2's Role Position in SpaceFlagPage
 							System.out.println("Client in port 8891");
 							inPort = 8891;
-						}else if(sc.getLocalAddress().toString().equals("/192.168.0.2:8892")){
+						}else if(sc.getLocalAddress().toString().equals("/10.22.24.156:8892")){
 							// Send winner in SpaceFlagPage
 							System.out.println("Client in port 8892");
 							inPort = 8892;
-						}else if(sc.getLocalAddress().toString().equals("/192.168.0.2:4041")){
+						}else if(sc.getLocalAddress().toString().equals("/10.22.24.156:4041")){
 							// Detect player1 offline
 							System.out.println("Play1 offline");
 							inPort = 4041;
@@ -149,7 +151,7 @@ public class MultiPortServer
 								grid[i] = 0;
 							}
 							inDetect = false;
-						}else if(sc.getLocalAddress().toString().equals("/192.168.0.2:4042")){
+						}else if(sc.getLocalAddress().toString().equals("/10.22.24.156:4042")){
 							// Send winner in SpaceFlagPage
 							System.out.println("Play2 offline");
 							inPort = 4042;
@@ -163,15 +165,15 @@ public class MultiPortServer
 								grid[i] = 0;
 							}
 							inDetect = false;
-						}else if(sc.getLocalAddress().toString().equals("/192.168.0.2:2000")){
+						}else if(sc.getLocalAddress().toString().equals("/10.22.24.156:2000")){
 							// Send grid status "who clicked this grid" to Client
 							System.out.println("Client in port 2000");
 							inPort = 2000;
-						}else if(sc.getLocalAddress().toString().equals("/192.168.0.2:2001")){
+						}else if(sc.getLocalAddress().toString().equals("/10.22.24.156:2001")){
 							// Client set grid (who click the grid)
 							System.out.println("Client in port 2001");
 							inPort = 2001;
-						}else if(sc.getLocalAddress().toString().equals("/192.168.0.2:2002")){
+						}else if(sc.getLocalAddress().toString().equals("/10.22.24.156:2002")){
 							// Send Current Turn to Client
 							System.out.println("Client in port 2002");
 							inPort = 2002;
