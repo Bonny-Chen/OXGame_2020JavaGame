@@ -65,7 +65,7 @@ public class Page {
     public static int isclicked = 0; // Use to monitor the click in RedoGrid()
     public static int redo = 0;
     public static int new_winner = 0;
-
+    public static int checkwin_again = 0;
     Page() {
         screen.setVisible(true);
         screen.setResizable(false);
@@ -161,6 +161,7 @@ public class Page {
                     if (new String(b.array(), 0, len).startsWith("0")
                             || new String(b.array(), 0, len).startsWith("1")) {
                         isclicked = Integer.parseInt(new String(b.array(), 0, len));
+                        System.out.println("isclicked = "+isclicked);
                     }
                 }
 
@@ -211,7 +212,7 @@ public class Page {
         Connection(Integer.parseInt(args[0]), "");
         Connection(8883, "");
 
-        System.out.println("player = " + player);
+        // System.out.println("player = " + player);
 
         glassPanel.setOpaque(false);
         glassPanel.setLayout(null);
@@ -346,13 +347,6 @@ public class Page {
         icon.setImage(icon.getImage().getScaledInstance(900, 630, Image.SCALE_DEFAULT));
         GridLabel.setIcon(icon);
 
-        // icon = new ImageIcon("Img/ox.png");
-        // icon.setImage(icon.getImage().getScaledInstance(398, 398,
-        // Image.SCALE_DEFAULT));
-        // GridLabel.setIcon(icon);
-        // GridLabel.setBounds(250, 50, 500, 500);
-        // GamePanel.add(GridLabel);
-
         icon = new ImageIcon("Img/Player" + player + "-" + role + ".png");
         icon.setImage(icon.getImage().getScaledInstance(170, 230, Image.SCALE_DEFAULT));
         player1label.setIcon(icon);
@@ -404,6 +398,7 @@ public class Page {
         }
         GridLabel.setBounds(0, 0, 900, 630);
         GamePanel.add(GridLabel);
+
         // Decide IsYourTurn
         Thread roundThread = new Thread(new Runnable() {
             int win = 0;
@@ -411,87 +406,58 @@ public class Page {
             int currentround = 0;
 
             public void run() {
-                BlockPage(player, selfrole);
                 // Get start turn
                 theRound = 1;
-                currentround = theRound;
-                while (winner == 0) {
-                    if (currentround != theRound) {
-                        check = 0;
-                        currentround = theRound;
-                        System.out.println("CurrentRound = " + currentround);
+                BlockPage(player, selfrole);
+                while(true){
+                    for (int i = 0; i < 9; i++) {
+                        Connection(2000, Integer.toString(i));
+                        if (gridChecked == 10 && check == 0 && record[i] == 0) { // 10 show that this grid drawn from player 1
+                            record[i] = 1;
+                            // Btn[i].setText("O");
+                            icon = new ImageIcon("Img/o.png");
+                            icon.setImage(icon.getImage().getScaledInstance(120, 118, Image.SCALE_DEFAULT));
+                            Btn[i].setIcon(icon);
+                            Btn[i].setClick(1);
+                            // check = 1;
+                        } else if (gridChecked == 20 && check == 0 && record[i] == 0) { // 20 show that this grid drawn from player 2
+                            record[i] = 2;
+                            // Btn[i].setText("X");
+                            icon = new ImageIcon("Img/x.png");
+                            icon.setImage(icon.getImage().getScaledInstance(120, 118, Image.SCALE_DEFAULT));
+                            Btn[i].setIcon(icon);
+                            Btn[i].setClick(1);
+                            // check = 1;
+                        }
+                        gridChecked = 0;
                     }
-
-                    // Check win
+    
                     winner = win;
                     win = CheckWin();
-                    if (check == 0) {
-                        for (int i = 0; i < 9; i++) {
-                            Connection(2000, Integer.toString(i));
-
-                            if (gridChecked == 10 && check == 0 && record[i] == 0) { // 10 show that this grid drawn
-                                                                                     // from player 1
-                                record[i] = 1;
-                                // Btn[i].setText("O");
-                                icon = new ImageIcon("Img/o.png");
-                                icon.setImage(icon.getImage().getScaledInstance(120, 118, Image.SCALE_DEFAULT));
-                                Btn[i].setIcon(icon);
-                                Btn[i].setClick(1);
-                                check = 1;
-                            } else if (gridChecked == 20 && check == 0 && record[i] == 0) { // 20 show that this grid
-                                                                                            // drawn from player 2
-                                record[i] = 2;
-                                // Btn[i].setText("X");
-                                icon = new ImageIcon("Img/x.png");
-                                icon.setImage(icon.getImage().getScaledInstance(120, 118, Image.SCALE_DEFAULT));
-                                Btn[i].setIcon(icon);
-                                Btn[i].setClick(1);
-                                check = 1;
-                            }
-                            gridChecked = 0;
+                    currentround = theRound;
+                    if(winner == 0){
+                        if (currentround != theRound) {
+                            currentround = theRound;
                         }
-                    }
-                    // NoYourTurn
-                    if (theRound != player) {
-
-                        // Block the player windows and Check current turn
-                        BlockPage(player, selfrole);
-                        Connection(2002, ""); // Update current turn
-                        System.out.println("theRound = " + theRound);
-                        if (win == 1 || win == 2 || win == 3) {
-                            if (OKBtnCount < 3)
-                                WinPage(win);
-                            else if (OKBtnCount >= 3) {
-                                if (win != player) {
-                                    GPanel2.setVisible(false);
-                                    screen.remove(GPanel2);
-                                }
-                                RedoGrid(win);
-                            }
-                            break;
-                        }
-                    } else if (theRound == player) {
-                        // IsYourTurn
-                        if (win == 0) {
+                        if(currentround == player){
                             GPanel2.setVisible(false);
-                            screen.remove(GPanel2); // Remove GlassPanel(GPanel2)
-                        } else if (win == 1 || win == 2 || win == 3) {
-                            if (OKBtnCount < 3)
-                                WinPage(win);
-                            else if (OKBtnCount >= 3) {
-                                if (win != player) {
-                                    GPanel2.setVisible(false);
-                                    screen.remove(GPanel2);
-                                }
-                                RedoGrid(win);
-                            }
-                            break;
+                        }else if(currentround != player){
+                            GPanel2.setVisible(true);
+                            Connection(2002, ""); // Update current turn    
                         }
-
-                        // continue;
+                    }else if(winner == 1 || winner == 2 || winner == 3){
+                        break;
                     }
-                    // Display O or X of each grid
-
+                }
+                
+                if (OKBtnCount < 3)
+                    WinPage(win);
+                else if (OKBtnCount >= 3) {
+                    if (win != player) {
+                        GPanel2.setVisible(false);
+                        screen.remove(GPanel2);
+                    }
+                    RedoGrid(win);
                 }
             }
         });
@@ -509,6 +475,14 @@ public class Page {
     public static int CheckWin() {
         int unclicked = 0;
         for (int i = 0; i < 9; i++) {
+            // Connection(2000, Integer.toString(i));
+            // if (gridChecked == 10) { // 10 show that this grid drawn from player 1
+            //     record[i] = 1;
+            // } else if (gridChecked == 20) { // 20 show that this grid drawn from player 2
+            //     record[i] = 2;
+            // }
+            // gridChecked = 0;
+            // System.out.println("record["+i+"] = "+record[i]);
             if (record[i] == 1 || record[i] == 2) {
                 unclicked++;
             }
@@ -564,12 +538,10 @@ public class Page {
 
         if (unclicked == 9) {
             return 3;
+        }else{
+            return 0;
         }
-        if(isclicked == 1 && redo == 1){
-            return 3;
-        }
-        System.out.println("isclicked = "+isclicked + " redo = "+ redo);
-        return 0;
+        
     }
 
     public static void BlockPage(int p, int r) {
@@ -625,12 +597,12 @@ public class Page {
                 while (OKBtnClicked == 0) {
                     System.out.println("Btnlooking");
                     if (OKBtnClicked == 1) {
-                        System.out.println("OKBtnClicked");
+                        // System.out.println("OKBtnClicked");
                         try {
                             countThread ct = new countThread();
                             new Thread(ct).start();
                         } catch (Exception E) {
-                            System.out.println("Thread started already " + E);
+                            // System.out.println("Thread started already " + E);
                         }
                     }
                 }
@@ -641,7 +613,8 @@ public class Page {
     }
 
     public static void RedoGrid(int winner) {
-        int tmpx = 0;
+        int thisTurn = 0;
+        int count = 0;
         redo = 1;
         if (winner == 1) {
             theRound = 2;
@@ -649,223 +622,88 @@ public class Page {
             theRound = 1;
         }
 
-        // isclicked = 0;
-        Connection(8889,"0");
+        Connection(8889,"0");           // Set isclicked == 0
         gridChecked = 0;
 
-        if (winner == player) {
+        if(winner != player){
+            icon = new ImageIcon("Img/background_RedoGrid.png");
+            icon.setImage(icon.getImage().getScaledInstance(900, 630, Image.SCALE_DEFAULT));
+            GridLabel.setIcon(icon);
+
             for (int i = 0; i < 9; i++) {
                 if (record[i] == winner) {
                     Connection(8888, Integer.toString(i)); // Reset server grid[i] to 0
-                    System.out.println("Change " + i + " to 0");
-                    record[i] = 0;
-                    Btn[i].setClick(0);
-                    Btn[i].addMouseListener(new MouseAdapter() {});
-                }
-            }
-            while (new_winner == 0 && isclicked == 0) {
-                new_winner = CheckWin();
-                if(new_winner == 0){
-                    Connection(8891,"Get");
-                }
-                // Connection(8889,"");           // Check isclicked value
-                for (int i = 0; i < 9; i++) {
-                    System.out.println("record[" + i + "] = " + record[i]);
-                    Connection(2000, Integer.toString(i));
-                    if (gridChecked == 10) { // 10 show that this grid drawn from player 1
-                        record[i] = 1;
-                        icon = new ImageIcon("Img/o.png");
-                        icon.setImage(icon.getImage().getScaledInstance(120, 118, Image.SCALE_DEFAULT));
-                        Btn[i].setIcon(icon);
-                        Btn[i].setClick(1);
-                    } else if (gridChecked == 20) { // 20 show that this grid drawn from player 2
-                        record[i] = 2;
-                        icon = new ImageIcon("Img/x.png");
-                        icon.setImage(icon.getImage().getScaledInstance(120, 118, Image.SCALE_DEFAULT));
-                        Btn[i].setIcon(icon);
-                        Btn[i].setClick(1);
-                    }
-                    gridChecked = 0;
-                }
-            }
-            System.out.println("End");
-            if(new_winner == 0){
-                new_winner = CheckWin();
-            }
-            if(new_winner!=0){
-                Connection(8890,Integer.toString(new_winner));
-            }
-        } else {
-            for (int i = 0; i < 9; i++) {
-                System.out.println("record[" + i + "] = " + record[i]);
-                if (record[i] == winner) {
-                    Connection(8888, Integer.toString(i)); // Reset server grid[i] to 0
-                    System.out.println("Change " + i + " to 0");
                     record[i] = 0;
                     Btn[i].setClick(0);
                     icon = new ImageIcon("");
                     Btn[i].setIcon(icon);
                 }
             }
-            icon = new ImageIcon("Img/background_RedoGrid.png");
-            icon.setImage(icon.getImage().getScaledInstance(900, 630, Image.SCALE_DEFAULT));
-            GridLabel.setIcon(icon);
-            while (new_winner == 0 && isclicked == 0) {
-                System.out.println("isclicked = "+isclicked);
-                new_winner = CheckWin();
-                if(new_winner == 0){
-                    Connection(8891,"Get");
-                }
-                // Connection(8889,"");           // Check isclicked value
-                if (theRound != winner) {
-                    for (int i = 0; i < 9; i++) {
-                        Connection(2000, Integer.toString(i));
-                        if (gridChecked == 10 && record[i] == 0) { // 10 show that this grid drawn from player 1
-                            record[i] = 1;
-                            // Btn[i].setText("O");
-                            icon = new ImageIcon("Img/o.png");
-                            icon.setImage(icon.getImage().getScaledInstance(120, 118, Image.SCALE_DEFAULT));
-                            Btn[i].setIcon(icon);
-                            Btn[i].setClick(1);
-                        } else if (gridChecked == 20 && record[i] == 0) { // 20 show that this grid drawn from player 2
-                            record[i] = 2;
-                            // Btn[i].setText("X");
-                            icon = new ImageIcon("Img/x.png");
-                            icon.setImage(icon.getImage().getScaledInstance(120, 118, Image.SCALE_DEFAULT));
-                            Btn[i].setIcon(icon);
-                            Btn[i].setClick(1);
-                        }
-                        gridChecked = 0;
-                    }
-                }
-            }
-            if(new_winner == 0){
-                new_winner = CheckWin();
-            }
-            if(new_winner!=0){
-                Connection(8890,Integer.toString(new_winner));
-            }
-            System.out.println("End");
 
+            GPanel2.setVisible(false);
+            screen.remove(GPanel2);
+            
+        }else{
+            for (int i = 0; i < 9; i++) {
+                if (record[i] == winner) {
+                    Connection(8888, Integer.toString(i)); // Reset server grid[i] to 0
+                    record[i] = 0;
+                    Btn[i].setClick(0);
+                    icon = new ImageIcon("");
+                    Btn[i].setIcon(icon);
+                }
+            }
         }
-        System.out.println("new_winner = " + new_winner);
-        Connection(8890,Integer.toString(new_winner));
+        while(new_winner == 0){  
+            
+            for (int i = 0; i < 9; i++) {
+                Connection(2000, Integer.toString(i));
+                if (gridChecked == 10 && record[i] == 0) { // 10 show that this grid drawn from player 1
+                    record[i] = 1;
+                    icon = new ImageIcon("Img/o.png");
+                    icon.setImage(icon.getImage().getScaledInstance(120, 118, Image.SCALE_DEFAULT));
+                    Btn[i].setIcon(icon);
+                    Btn[i].setClick(1);
+                } else if (gridChecked == 20 && record[i] == 0) { // 20 show that this grid drawn from player 2
+                    record[i] = 2;
+                    icon = new ImageIcon("Img/x.png");
+                    icon.setImage(icon.getImage().getScaledInstance(120, 118, Image.SCALE_DEFAULT));
+                    Btn[i].setIcon(icon);
+                    Btn[i].setClick(1);
+                }
+                gridChecked = 0;
+            }
+
+            if(isclicked == 1 && checkwin_again == 0){
+                new_winner = CheckWin();
+                checkwin_again = 1;
+            }     
+            if(checkwin_again == 1 && thisTurn == 1){
+                if(new_winner == 0){
+                    new_winner = CheckWin();
+                    System.out.println("new_winner = "+new_winner);
+                }
+                while(count < 5 && new_winner == 0){
+                    new_winner = CheckWin();
+                    count++;
+                }
+                if(new_winner == 0){
+                    new_winner = 3;
+                }
+            }
+            if(isclicked == 1)
+                thisTurn = 1;
+            if(winner != player && new_winner != 0){
+                Connection(8890,Integer.toString(new_winner));
+                break;
+            }else if(winner == player){
+                Connection(8891,"Get");
+            }
+        }
+        
         WinPage(new_winner);
     }
 
-    public static void SpaceFlagPage() {
-        ImageIcon flagIcon, flagIcon2, character, character2, srver; // srver : Client VS Server(PC)
-        Image image;
-        JLabel flagLabel, flagLabel2, srverLabel, bgLabel;
-        SpacePanel.setVisible(true);
-        screen.setTitle("SpaceFlagPage" + "-Player " + player);
-        SpacePanel.setLayout(null);
-
-        // Detect Key Press
-        addKeyBind(SpacePanel, "SPACE");
-        icon = new ImageIcon("Img/SpaceFlagPageBackground.png");
-        image = icon.getImage();
-        image = image.getScaledInstance(900, 630, java.awt.Image.SCALE_SMOOTH);
-        icon = new ImageIcon(image);
-
-        flagIcon = new ImageIcon("Img/Flag.png");
-        image = flagIcon.getImage();
-        image = image.getScaledInstance(50, 70, java.awt.Image.SCALE_SMOOTH);
-        flagIcon = new ImageIcon(image);
-        flagIcon2 = flagIcon;
-
-        character = new ImageIcon("Img/Player" + player + "-" + selfrole + ".png");
-        image = character.getImage();
-        image = image.getScaledInstance(50, 70, java.awt.Image.SCALE_SMOOTH);
-        character = new ImageIcon(image);
-
-        character2 = new ImageIcon("Img/Player" + Integer.toString(anPlayer) + "-" + Integer.toString(anRole) + ".png");
-        image = character2.getImage();
-        image = image.getScaledInstance(50, 70, java.awt.Image.SCALE_SMOOTH);
-        character2 = new ImageIcon(image);
-
-        // Setting Srver Player
-        srver = new ImageIcon("Img/Player" + 2 + "-" + 1 + ".png");
-        image = srver.getImage();
-        image = image.getScaledInstance(50, 70, java.awt.Image.SCALE_SMOOTH);
-        srver = new ImageIcon(image);
-
-        flagLabel = new JLabel(flagIcon);
-        flagLabel2 = new JLabel(flagIcon2);
-        bgLabel = new JLabel(icon);
-        characterLabel = new JLabel(character);
-        characterLabel2P1 = new JLabel(character2);
-        characterLabel2P2 = new JLabel(character2);
-        srverLabel = new JLabel(srver);
-
-        flagLabel.setBounds(200, 0, 50, 70);
-        flagLabel2.setBounds(600, 0, 50, 70);
-        bgLabel.setBounds(0, 0, 900, 630);
-        if (player == 1) {
-            characterLabel.setBounds(200, x, 50, 70);
-            characterLabel2P2.setBounds(600, P2y, 50, 70);
-
-        } else if (player == 2) {
-            characterLabel.setBounds(200, x, 50, 70);
-            characterLabel2P1.setBounds(600, P1y, 50, 70);
-
-        }
-
-        Thread getPostThread = new Thread(new Runnable() {
-            public void run() {
-                while (P1y != 0) {
-                    Connection(8890, "");
-                    characterLabel2P1.setBounds(600, P1y, 50, 70);
-                    try {
-                        Thread.sleep(100);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                if (P2y != 0) {
-                    WinPage(2);
-                }
-                System.out.println("End of Thread");
-
-            }
-        });
-
-        Thread p2Thread = new Thread(new Runnable() {
-            public void run() {
-                while (P2y != 0) {
-                    Connection(8891, "");
-                    characterLabel2P2.setBounds(600, P2y, 50, 70);
-                    try {
-                        Thread.sleep(100);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-                if (P1y != 0) {
-                    WinPage(1);
-                    // JOptionPane.showMessageDialog(SpacePanel,"Player 2 win");
-                }
-                System.out.println("End of Thread");
-
-            }
-        });
-        if (anPlayer == 1)
-            getPostThread.start();
-        if (anPlayer == 2)
-            p2Thread.start();
-
-        SpacePanel.add(flagLabel);
-        SpacePanel.add(flagLabel2);
-        SpacePanel.add(characterLabel);
-        SpacePanel.add(characterLabel2P1);
-        SpacePanel.add(characterLabel2P2);
-        SpacePanel.add(srverLabel);
-        SpacePanel.add(bgLabel);
-        screen.add(SpacePanel);
-        screen.validate();
-
-    }
 
     public static void WinPage(int winner) {
         ImageIcon icon = new ImageIcon("Img/logo.png");
@@ -906,42 +744,6 @@ public class Page {
         screen.validate();
     }
 
-    static Action spaceAction = new AbstractAction() {
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            if (x != 0) {
-                // KeyPressed Action
-                x -= 20;
-                if (player == 1) {
-                    Connection(8888, Integer.toString(x));
-                } else if (player == 2) {
-                    Connection(8889, Integer.toString(x));
-                }
-
-                characterLabel.setBounds(200, x, 50, 70);
-            } else if (x == 0) {
-                if (player == 1) {
-                    winner = 2;
-                    WinPage(2);
-                } else if (player == 2) {
-                    winner = 1;
-                    WinPage(1);
-                    // JOptionPane.showMessageDialog(SpacePanel,"Player 2 win");
-                }
-            }
-        }
-    };
-
-    private static final String DISABLE_CLICKER = "disableClicker";
-
-    private static void addKeyBind(JComponent contentPane, String key) {
-        InputMap iMap = contentPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
-        ActionMap aMap = contentPane.getActionMap();
-        iMap.put(KeyStroke.getKeyStroke(key), DISABLE_CLICKER);
-        aMap.put(DISABLE_CLICKER, spaceAction);
-    }
-
     private static class ButtonHandler implements ActionListener {
         private Integer LastClick = -1;
         private static String[] m1 = { "127.1", "8880" };
@@ -955,7 +757,7 @@ public class Page {
             // ?
             if (ExistsLastClick() >= 0 && ExistsLastClick() != 4 && ExistsLastClick() != 13) {
                 Character = ExistsLastClick();
-                System.out.println("LastClick " + ExistsLastClick());
+                // System.out.println("LastClick " + ExistsLastClick());
                 if (Character >= 10 && Character <= 12) {
                     Character = Character - 10;
                     tmpBtn = Button[ExistsLastClick() - 10];
@@ -967,28 +769,36 @@ public class Page {
 
             if (theRound == 1 && player == 1) {
                 if (myBtn.getID() <= 8 && myBtn.getID() >= 0 && gridChecked == 0 && myBtn.IsClicked() == 0) {
-                    // myBtn.setText("O");
-                    // record[myBtn.getID()] = 1;
-                    System.out.println("clicked");
+                    System.out.println("in");
                     icon = new ImageIcon("Img/o.png");
                     icon.setImage(icon.getImage().getScaledInstance(120, 118, Image.SCALE_DEFAULT));
                     myBtn.setIcon(icon);
                     // isclicked = 1;
                     Connection(8889,"1");
                     Connection(2001, Integer.toString(myBtn.getID() + 10));
+                    Connection(2000,Integer.toString(myBtn.getID()));
+                    System.out.println("gridChecked = "+gridChecked);
+                    if( gridChecked != 10){
+                        Connection(2001, Integer.toString(myBtn.getID() + 10));
+                        Connection(2000,Integer.toString(myBtn.getID()));
+                    }
                 }
                 Connection(8882, ""); // update theRound
             } else if (theRound == 2 && player == 2) {
                 if (myBtn.getID() <= 8 && myBtn.getID() >= 0 && gridChecked == 0 && myBtn.IsClicked() == 0) {
-                    // myBtn.setText("X");
-                    // record[myBtn.getID()] = 2;
-                    System.out.println("clicked");
+                    System.out.println("in");
                     icon = new ImageIcon("Img/x.png");
                     icon.setImage(icon.getImage().getScaledInstance(120, 118, Image.SCALE_DEFAULT));
                     myBtn.setIcon(icon);
                     // isclicked = 1;
                     Connection(8889,"1");
                     Connection(2001, Integer.toString(myBtn.getID() + 20));
+                    Connection(2000,Integer.toString(myBtn.getID()));
+                    System.out.println("gridChecked = "+gridChecked);
+                    if( gridChecked != 20){
+                        Connection(2001, Integer.toString(myBtn.getID() + 20));
+                        Connection(2000,Integer.toString(myBtn.getID()));
+                    }
                 }
                 Connection(8882, "");
             }
@@ -1012,7 +822,7 @@ public class Page {
                     Connection(4042, "");
                 }
                 screen.dispose();
-                System.out.println("JFrame Closed!");
+                // System.out.println("JFrame Closed!");
                 System.exit(0);
             }
 
@@ -1029,7 +839,7 @@ public class Page {
             if (myBtn.getID() >= 9)
                 getLastClick(myBtn.getID());
 
-            System.out.println(myBtn.getID() + " was clicked");
+            // System.out.println(myBtn.getID() + " was clicked");
             inButtonHandler = 0;
         }
 
@@ -1112,10 +922,10 @@ class countThread implements Runnable {
     public void run() {
         try {
             Thread.sleep(1500);
-            System.out.println("Clicked : " + Page.OKBtnCount);
+            // System.out.println("Clicked : " + Page.OKBtnCount);
             Page.PlayerPanel.setVisible(false);
             if (Page.player == 1) {
-                System.out.println("Character : " + Integer.toString(Page.Character));
+                // System.out.println("Character : " + Integer.toString(Page.Character));
                 Page.Connection(8884, Integer.toString(Page.Character));
             } else if (Page.player == 2) {
                 Page.Connection(8885, Integer.toString(Page.Character));
@@ -1126,7 +936,7 @@ class countThread implements Runnable {
                 // Mode On
                 System.out.println("mode on");
             }
-            System.out.println("ct closed");
+            // System.out.println("ct closed");
         } catch (Exception e) {
         }
     }
