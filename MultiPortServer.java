@@ -29,7 +29,6 @@ public class MultiPortServer
 	public static int setGrid = 100;
 	public static int isclicked = 0;
 	public static int new_winner = 0;
-	public static int loopbreak = 0;
 
 	public static void main(String args[]) throws Exception 
 	{
@@ -71,7 +70,6 @@ public class MultiPortServer
 		// The main loop waiting for events
 		while(true)
 		{
-			if(loopbreak==1)break;
 		    // The following method blocks until 
 		    // at least one of the registered events occurs.
 			int num = selector.select();

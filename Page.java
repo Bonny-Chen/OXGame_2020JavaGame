@@ -450,17 +450,25 @@ public class Page {
                     }
                 }
                 
+
                 if (OKBtnCount < 3||winner==3)
+
+                if (OKBtnCount < 3)
+
                     WinPage(win);
                 else if (OKBtnCount >= 3) {
                     if (win != player) {
                         GPanel2.setVisible(false);
                         screen.remove(GPanel2);
                     }
+
                     if(winner==1||winner==2){
                         RedoGrid(win);
                     }
                     
+
+                    RedoGrid(win);
+
                 }
             }
         });
